@@ -21,11 +21,19 @@ A self-developed database interface wrapper with support for realtime communicat
 Notably so, an excellent feature of kisdb is that the actual Database behind it can be freely chosen, that includes sqlite, mongodb, postgres, spacetimedb or anything else really. In theory a custom mapper could even be used to store different kinds of data in different databases, appealing to each of their unique individual strengths, all completely transparent to the client.
 Continuing to fit in with the project theme, kisdb too can be made to serve over a [WebTransport](https://developer.mozilla.org/en-US/docs/Web/API/WebTransport_API) socket connection with for example sqlite as a local DB on the server.
 
+### > [XIAO ESP32-C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html)
+This particular microcontroller is my current goto for any project.
+It's tiny, cheap, modern, powerful and efficient: what else could one possibly be asking for. It's even got enough pins (despite the size) for any reasonable project, when that's not enough an IO Expander was needed anyways. The cherry on top is that it uses RISC-V architecture, which has it's own problems for sure, but definitely adds a _"coolness-factor"_.
+Given it's list of [features](https://www.espressif.com/en/products/socs/esp32-c6) and capabilities, MQTT over QUIC shouldn't be a major problem. In fact an [example](https://github.com/emqx/ESP32-QUIC) from EMQX on the similar eps32c3 already exists and seems very promising.
+
+### > [Raspberry Pi 3B](https://www.raspberrypi.com/products/raspberry-pi-3-model-b/)
+As provided by the university along with a barrage of sensors, I'll be using the Pi for hosting all needed services. I don't intend on using it to read any sensors directly, rather as a plain server running the web-interface (project dashboard), mqtt broker, database and all server-side logic/processing. I don't intend on doing anything fancy here, just plain debian 13 with [bun](https://bun.sh) and perhaps some [go](https://go.dev/). Also [Docker compose](https://docs.docker.com/compose/) for running the broker and perhaps Database, depending on choice.
+
+### > [React](https://react.dev/)
+Given that I come from the world of electronical engineering rather than software, I am very used to low-level. The lower level, the more control. I've always strived to understand everything I use, the best way of doing that is to make it yourself. Taking the time-aspect of such an endeavour aside, it's become somewhat clear to me that some solutions simply are already solved and don't need to be dealt with. I would thus like to experience making the WebUI of this project with React instead of using my usual custom vanilla wrappers and helpers. Albeit, not knowing the full extent of the UI yet, it might end up being far simpler to just go with vanilla, nevertheless I'm optimistic about the opportunity to explore this different world of web-dev.
 
 ## Some brief words on scope-creep and project complexity
 As someone who I assume has read or at least seen the above section of Tools & Technologies, you're thinking it's too much. Well no worries, I've had the same thoughts. All of the above mentioned tools fit well with the overall project task but are primarily chosen by me because I want to learn how they work and gain first-hand experience using them in a project, not just random _Hello, World!_ copy-pastes. Definitely a "nice-to-have" rather than "must-have" kind of mindset. Every single tool mentioned can easily be swapped out for a simpler, weller-known, better supported, tried-n-tested alternative. These are not set-in-stone commitments, should timelines take a turn for the worse, any one _(or many)_ of them can be sacrificed for the sake of completing the project as a whole. With that having been said, going with all the clear and simple options from the beginning might be smart but also quite boring, so this is the most I can compromise :D
-
-#
 
 #
 
