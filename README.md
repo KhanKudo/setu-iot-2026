@@ -1,35 +1,66 @@
-# Project Name
+# Project Name TBD
 #### Student Name: Luka Milenkovic   Student ID: el25b216@technikum-wien.at
 
 Assignment from the IoT Standards & Protocols course of 2026 at [SETU Ireland](https://setu.ie) part of the Study@Home program at [UAS Technikum Wien](https://technikum-wien.at/en).
 
+# Project Overview
+
+## Soil moisture sensor
+- connected through provided Arduino or mentioned ESP32-C6
+- Over WiFi, through MQTT to Rasperry Pi
+## Pi SenseHAT v1.0
+It features a temperature, humidity, pressure, gyroscope and acceleration sensor, with a joystick (5-button-schema).
+Additionally it has an onboard 8x8 RGB Matrix display.
+The following modes would be selectable from WebUI and or by joystick,
+or by using gyro+accl depending on resting orientation, it can select the desired mode. (Maybe a 'shake-to-interact' feature)
+All sensors would also be time-logged to a persistent database and viewable in the WebUI dashboard.
+  - animated simple plant (both on 8x8 matrix and in WebUI)
+    - rain-fall (blue moving dots) when it's time to water
+    - can make virtual plant seem to be drying out (falling over) when too low moisture
+  - low-res moisture graph (bar-chart)
+    - over time: last 72hrs
+    - 8 columns: 9h steps
+    - 8 rows: 12.5% steps (perhaps top/bottom clipped, between finer resolution)
+    - pixel color/brightnes gradient can achieve higher perceived resolution
+  - other similar graphs for 
+## snake game (rpi sense hat v1.0)
+A goal of this minigame would be to make the whole process realtime.
+This is an IoT Project, not gamedev. The Buttons and the 8x8 Matrix would be independent sensors and actuators.
+The gamelogic and control would live on the "server". Even though physically the Raspberry Pi connects to it all,
+I intend to treat the buttons/controls and the display as completely separate devices, only interacting with the IoT Backend.
+To emphasize this disconnect and making sure that everything is truly happening in the IoT backbone, the WebUI should have no problems
+live-streaming Matrix state as well as interacting directly to simulate the joystick inputs via Laptops keyboard (WASD/arrow keys).
+The Pi's 8x8 Matrix should of course also then react to anything and everything that the laptop would simulate as data.
+## pong game (rpi sense hat v1.0)
+Just like snake, it would be the goal to make everything realtime so that one player could be on laptop and another on raspi and play in real time going through the IoT Layers efficiently. Even a separate spectator laptop could be connected and the system shouldn't struggle with that.
+
 TODO: Write a short project description. (still not sure about exact project details)
 
-## Tools, Technologies and Equipment
+# Tools, Technologies and Equipment
 
-### > [HTTP/3](https://en.wikipedia.org/wiki/HTTP/3) / [QUIC](https://en.wikipedia.org/wiki/QUIC)
+## > [HTTP/3](https://en.wikipedia.org/wiki/HTTP/3) / [QUIC](https://en.wikipedia.org/wiki/QUIC)
 The next-generation HTTP-Protocol offering superior latency, bandwidth, reliability and efficiency all with more fine-grained control. It is mature enough now that all modern client devices support it and server-side support is mostly present too, though still developing.
 Seeing as this is the future of the internet, it would be a great learning opportunity to get some first-hand experience with the protocol.
 
-### > [MQTT](https://en.wikipedia.org/wiki/MQTT)
+## > [MQTT](https://en.wikipedia.org/wiki/MQTT)
 As it's standard and extremely widespread, MQTT is just a default-pick for IoT. Traditionally the [Mosquitto Broker](https://github.com/eclipse-mosquitto/mosquitto) is the goto choice for self-hosting, being that it's very easy to set up and it offers enough customization for most personal usecases. It's well-tested and can be considered secure. However [EMQX](https://github.com/emqx/emqx) is an enticing newer option that more so targets enterprise-scale deployment boasting support for hundreds of millions of concurrent devices on a single cluster. It has a full management web-dashboard with complete control over users, identities, permissions, groups, projects and so much more. Among many other features, it natively supports [MQTT over QUIC](https://docs.emqx.com/en/emqx/latest/mqtt-over-quic/introduction.html), fitting in very well with the overall interest of using HTTP/3 in this project.
 
-### > [kisdb](https://github.com/KhanKudo/kisdb)
+## > [kisdb](https://github.com/KhanKudo/kisdb)
 > ###### _(not yet published)_
 
 A self-developed database interface wrapper with support for realtime communication and ability to act as a functional logic-API-Layer not just a plain DB-Wrapper.
 Notably so, an excellent feature of kisdb is that the actual Database behind it can be freely chosen, that includes sqlite, mongodb, postgres, spacetimedb or anything else really. In theory a custom mapper could even be used to store different kinds of data in different databases, appealing to each of their unique individual strengths, all completely transparent to the client.
 Continuing to fit in with the project theme, kisdb too can be made to serve over a [WebTransport](https://developer.mozilla.org/en-US/docs/Web/API/WebTransport_API) socket connection with for example sqlite as a local DB on the server.
 
-### > [XIAO ESP32-C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html)
+## > [XIAO ESP32-C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html)
 This particular microcontroller is my current goto for any project.
 It's tiny, cheap, modern, powerful and efficient: what else could one possibly be asking for. It's even got enough pins (despite the size) for any reasonable project, when that's not enough an IO Expander was needed anyways. The cherry on top is that it uses RISC-V architecture, which has it's own problems for sure, but definitely adds a _"coolness-factor"_.
 Given it's list of [features](https://www.espressif.com/en/products/socs/esp32-c6) and capabilities, MQTT over QUIC shouldn't be a major problem. In fact an [example](https://github.com/emqx/ESP32-QUIC) from EMQX on the similar eps32c3 already exists and seems very promising.
 
-### > [Raspberry Pi 3B](https://www.raspberrypi.com/products/raspberry-pi-3-model-b/)
-As provided by the university along with a barrage of sensors, I'll be using the Pi for hosting all needed services. I don't intend on using it to read any sensors directly, rather as a plain server running the web-interface (project dashboard), mqtt broker, database and all server-side logic/processing. I don't intend on doing anything fancy here, just plain debian 13 with [bun](https://bun.sh) and perhaps some [go](https://go.dev/). Also [Docker compose](https://docs.docker.com/compose/) for running the broker and perhaps Database, depending on choice.
+## > [Raspberry Pi 3B](https://www.raspberrypi.com/products/raspberry-pi-3-model-b/)
+As provided by the university along with a barrage of sensors, I'll be using the Pi for hosting all needed services. I don't intend on using it as a sensor-client (except for HAT sensors), but rather as a server running the web-interface (project dashboard), mqtt broker, database and all needed server-side logic/processing, including outputting to the 8x8 Matrix Display HAT. Nothing fancy, just plain debian 13 with [bun](https://bun.sh) and perhaps some [go](https://go.dev/). Also [Docker compose](https://docs.docker.com/compose/) for running the broker and perhaps Database, depending on choice.
 
-### > [React](https://react.dev/)
+## > [React](https://react.dev/)
 Given that I come from the world of electronical engineering rather than software, I am very used to low-level. The lower level, the more control. I've always strived to understand everything I use, the best way of doing that is to make it yourself. Taking the time-aspect of such an endeavour aside, it's become somewhat clear to me that some solutions simply are already solved and don't need to be dealt with. I would thus like to experience making the WebUI of this project with React instead of using my usual custom vanilla wrappers and helpers. Albeit, not knowing the full extent of the UI yet, it might end up being far simpler to just go with vanilla, nevertheless I'm optimistic about the opportunity to explore this different world of web-dev.
 
 ## Some brief words on scope-creep and project complexity
@@ -43,5 +74,5 @@ As someone who I assume has read or at least seen the above section of Tools & T
 
 TODO: Write a list of things you propose to use in your work. This can be hardware, programming languages etc.
 
-## Project Repository
+# Project Repository
 [GitHub > KhanKudo > setu-iot-2026](https://github.com/KhanKudo/setu-iot-2026.git)
