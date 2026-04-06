@@ -9,3 +9,5 @@
 
 # Visual Form over Technical Correctness
 It's also notable that some of the content such as the MQTT arrow from the senseHAT is not technically correct, but visually is the best at communicating the given project aspect in an understandable matter. For example, the senseHAT cannot directly use mqtt, but that will go through the server pi which will entirely rely on mqtt and not use any local communication.
+
+![Project Graphic](IoT-Assignment-Graphic.drawio.png)

@@ -10,7 +10,9 @@ Assignment from the IoT Standards & Protocols course of 2026 at [SETU Ireland](h
 # Introduction
 The project will make use of an esp32c6, a raspberry pi, various sensors, a joystick user input and an 8x8 rgb matrix display to create fun interactive experiences for it's users. All of these will be combined with IoT technologies, security layers, a Web Interface and some local hosting aspects with the key focus of realtime minimal latency throughout the entire IoT Stack. Customizable Server-Side Automations are to be utilized to achieve device responsivenes on par with integrated firmware, indistinguishable for the enduser. Modularity and flexibility will be at the heart of each step along the way, as the IoT industry is built upon dynamic environments, constantly evolving tasks and everchanging requirements.
 
+
 # Project Overview
+![Project Graphic](graphic/IoT-Assignment-Graphic.drawio.png)
 ## Challenge
 The general mindest of this project, is to make all the sensors and actuators to be mentioned behave exactly as such; Plain sensors and actuators. In spirit of IoT (and out of curiosity as well as _some_ practicality), the logic will be a matter of 'automation', not embedded firmware. The various IoT Layers should work together to keep the whole system highly responsive and allow realtime application-level logic to be performed on the server-side with pure sensor input and actuator outputs. The fluency of this is supposed to be good enough that an enduser wouldn't be able to tell it's not actual offline firmware logic. And yes, some sensors/actuators may be connected directly to the Raspberry Pi via it's SenseHAT, those however will be treated as separate devices. All communication will without exception go through the complete IoT Stack.
 ## Soil moisture sensor
