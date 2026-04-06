@@ -6,4 +6,6 @@
 * The rainbow 8x8 rgb matrix images was cropped from a store listing on [adafruit.com](https://www.adafruit.com/product/3444)
 * The background image/gradient was taken from the library of [canva.com](https://www.canva.com/templates/EAGVeNul414-blue-gradient-linktree-background/)
 * And lastly everything else was created using [draw.io](https://draw.io) with some cutouts and crops performed using [GIMP](https://www.gimp.org/)
-* 
+
+# Visual Form over Technical Correctness
+It's also notable that some of the content such as the MQTT arrow from the senseHAT is not technically correct, but visually is the best at communicating the given project aspect in an understandable matter. For example, the senseHAT cannot directly use mqtt, but that will go through the server pi which will entirely rely on mqtt and not use any local communication.
