@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Project IoNoW</title>
+        <style>
+            #stick {
+                position: relative;
+                width: 3em;
+                height: 3em;
+                font-size: 6.5em;
+                user-select: none;
+            }
+
+            #stick>div {
+                position: absolute;
+                width: 1em;
+                height: 1em;
+                padding: 0;
+                margin: 0;
+                text-align: center;
+                vertical-align: middle;
+            }
+
+            #stick>div#stick-up {
+                left: 1em;
+                top: 0em;
+            }
+            #stick>div#stick-left {
+                left: 0em;
+                top: 1em;
+            }
+            #stick>div#stick-middle {
+                left: 1em;
+                top: 1em;
+            }
+            #stick>div#stick-right {
+                left: 2em;
+                top: 1em;
+            }
+            #stick>div#stick-down {
+                left: 1em;
+                top: 2em;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="matrix" width="320" height="320"></canvas>
+        <div id="stick">
+          <div id="stick-up" onpointerdown="DB.stick.up(true)" onpointerup="DB.stick.up(false)">⯅</div>
+          <div id="stick-left" onpointerdown="DB.stick.left(true)" onpointerup="DB.stick.left(false)">⯇</div>
+          <div id="stick-middle" onpointerdown="DB.stick.middle(true)" onpointerup="DB.stick.middle(false)">●</div>
+          <div id="stick-right" onpointerdown="DB.stick.right(true)" onpointerup="DB.stick.right(false)">⯈</div>
+          <div id="stick-down" onpointerdown="DB.stick.down(true)" onpointerup="DB.stick.down(false)">⯆</div>
+        </div>
+        <footer>
+            <script src="browser.js"></script>
+        </footer>
+    </body>
+</html>

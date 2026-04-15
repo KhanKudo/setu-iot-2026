@@ -1,0 +1,19 @@
+{
+  "name": "server",
+  "module": "index.ts",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "private": true,
+  "scripts": {
+    "build": "bun build client/client.ts --target browser --bundle --outfile ../static/browser.js",
+    "start": "bun run build && bun run index.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "@khankudo/kisdb": "^0.0.4"
+  }
+}
