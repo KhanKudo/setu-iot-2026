@@ -117,7 +117,8 @@ class KisDBClient:
             if message == "pong":
                 continue
             data = json.loads(message)
-            key, value = data[0], data[1]
+            key = data[0]
+            value = data[1] if len(data) > 1 else None
             if isinstance(key, (int, float)):
                 fut = self.pending_ids.pop(int(key), None)
                 if fut:

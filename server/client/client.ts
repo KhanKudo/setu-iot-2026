@@ -11,13 +11,6 @@ const DB = createVanillaViewer<ionowType & { speedtest: number }>(client)
 
 const ctx2d = (document.getElementById('matrix') as HTMLCanvasElement).getContext('2d')!
 
-DB.stick.$onnow = (state) => {
-  console.log('stick:', state)
-  for (const k in state) {
-    document.getElementById('stick-' + k)!.style.color = (state as any)[k] ? 'red' : ''
-  }
-}
-
 DB.matrix.$onnow = (matrix) => {
   const S = 40
   const pixel = (x: number, y_inv: number, col?: number) => {
@@ -33,40 +26,24 @@ DB.matrix.$onnow = (matrix) => {
 window.addEventListener('keydown', ({ key }) => {
   switch (key) {
     case 'ArrowUp':
-      DB.stick.up(true)
+      //@ts-expect-error
+      DB.controls.up()
       break
     case 'ArrowDown':
-      DB.stick.down(true)
+      //@ts-expect-error
+      DB.controls.down()
       break
     case 'ArrowLeft':
-      DB.stick.left(true)
+      //@ts-expect-error
+      DB.controls.left()
       break
     case 'ArrowRight':
-      DB.stick.right(true)
+      //@ts-expect-error
+      DB.controls.right()
       break
     case 'Enter':
-      DB.stick.middle(true)
-      break
-  }
-})
-
-
-window.addEventListener('keyup', ({ key }) => {
-  switch (key) {
-    case 'ArrowUp':
-      DB.stick.up(false)
-      break
-    case 'ArrowDown':
-      DB.stick.down(false)
-      break
-    case 'ArrowLeft':
-      DB.stick.left(false)
-      break
-    case 'ArrowRight':
-      DB.stick.right(false)
-      break
-    case 'Enter':
-      DB.stick.middle(false)
+      //@ts-expect-error
+      DB.controls.middle()
       break
   }
 })
