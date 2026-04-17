@@ -106,6 +106,12 @@ class KisDBClient:
         if self.ws is None:
             return
 
+        self._last_token = ""
+
+        for key in self.sub_callbacks:
+            # TODO: sub-type should be respected, not just hard-coded.
+            await self.send_raw_data(0, key, "now+future")
+
         async for message in self.ws:
             # print(f"msg: {message}")
             if message == "pong":
