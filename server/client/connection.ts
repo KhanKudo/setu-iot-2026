@@ -2,6 +2,11 @@ import { createWebSocketClient } from "@khankudo/kisdb/client/websocket"
 import { getToken } from "@khankudo/kisdb/core/management"
 import type { Database } from "../src/db"
 
+let connListener: ((state: boolean) => void) | null = null
+export function isConnected(listener: (state: boolean) => void) {
+  connListener = listener
+}
+
 const accounts: Record<string, { token: string }> = {}
 
 const stored = sessionStorage.getItem('accounts')
@@ -31,7 +36,7 @@ setTimeout(() => {
     selectUser(act)
 }, 100)
 
-export const client = createWebSocketClient<Database>(undefined, ctx)
+export const client = createWebSocketClient<Database>(undefined, ctx, ok => connListener?.(ok))
 
 export async function login(username: string, password: string) {
   const lastToken = ctx.token

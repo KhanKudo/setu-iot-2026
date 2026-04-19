@@ -1,5 +1,5 @@
 import { createVanillaViewer } from "@khankudo/kisdb/viewer/vanilla"
-import { addAccount, client, login, selectUser } from "./connection"
+import { addAccount, client, isConnected, login, selectUser } from "./connection"
 
 const { matrix: MATRIX, game: GAME } = createVanillaViewer(client, 'public')
 const PLAYER = createVanillaViewer(client, 'controls')
@@ -12,7 +12,7 @@ GAME.$onnow = name => {
     title.innerText = name
 }
 
-MATRIX.$onnow = (matrix) => {
+function render(matrix: string) {
   const S = 40
   const pixel = (x: number, y_inv: number, col?: number) => {
     if (col !== undefined)
@@ -23,6 +23,13 @@ MATRIX.$onnow = (matrix) => {
     pixel(i % 8, Math.floor(i / 8), matrix.charCodeAt(i) - 48)
   }
 }
+MATRIX.$onnow = render
+//splashscreen
+render("8888888888888888800880088008800888800888880000888800008888088088")
+isConnected(ok => {
+  if (!ok)
+    render("8888888888888888800880088008800888800888880000888800008888088088")
+})
 
 window.addEventListener('keydown', ({ key }) => {
   switch (key) {
