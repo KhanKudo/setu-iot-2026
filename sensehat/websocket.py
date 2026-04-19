@@ -4,17 +4,23 @@ import json
 import random
 import time
 from asyncio.log import logger
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import websockets
 from kcp import DataType, ListenerType, SubType
 
 
 class KcpWebSocketClient:
-    def __init__(self, url: str, token: str = ""):
+    def __init__(
+        self,
+        url: str,
+        token: str = "",
+        connState: Callable[[bool], Any] = lambda x: None,
+    ):
         self.url = url
         self.token = token
         self._last_token = ""
+        self._onConn = connState
         self.ws = None
         self.pending_ids: Dict[int, asyncio.Future] = {}
         self.sub_callbacks: Dict[str, List[ListenerType]] = {}
@@ -54,6 +60,7 @@ class KcpWebSocketClient:
         async for websocket in websockets.connect(self.url):
             # CRITICAL: Assign the yielded connection to our instance variable
             self.ws = websocket
+            self._onConn(True)
 
             try:
                 # Now _receive_loop can actually use self.ws
@@ -64,6 +71,7 @@ class KcpWebSocketClient:
                 logger.error(f"Unexpected error: {e}")
             finally:
                 self.ws = None
+                self._onConn(False)
 
     async def _request(self, key: str, value: Any = None, has_value: bool = False):
         id_val = int(time.time() * 1e6 + random.randint(0, int(1e6)))

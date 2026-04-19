@@ -34,7 +34,11 @@ def render(matrix, _=None):
 
 
 # Creeper face as splashscreen - inspired by Raspberry Pi's SenseHAT Setup Guide
-render("8888888888888888800880088008800888800888880000888800008888088088")
+def splashscreen():
+    render("8888888888888888800880088008800888800888880000888800008888088088")
+
+
+splashscreen()
 
 
 async def main():
@@ -42,6 +46,7 @@ async def main():
     client = KcpWebSocketClient(
         "ws://192.168.0.20:3000/kisdb-ws",
         "94de889064a147c3a960d289356858dc6a384b2a90c04f078a47bd87ddef7137",
+        lambda ok: splashscreen() if not ok else None,
     )
     await asyncio.sleep(1)
     PUBLIC = KcpProxyViewer(client, "public")
