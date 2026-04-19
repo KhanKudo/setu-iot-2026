@@ -1,0 +1,16 @@
+[Unit]
+Description=The main python service running for the SETU-IoT 2026 course: Project IoNoW
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python main.py
+WorkingDirectory=/home/raspi/project-ionow
+User=raspi
+Group=raspi
+Restart=always
+RestartSec=1s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
