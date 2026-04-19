@@ -1,17 +1,13 @@
 import { createVanillaViewer } from "@khankudo/kisdb/viewer/vanilla"
-import { createWebSocketClient } from "@khankudo/kisdb/client/websocket"
-import type { ionowType } from "../index"
+import type { Controls, Public } from "../index"
+import { addAccount, client, login, selectUser } from "./connection"
 
-if (!sessionStorage.getItem('token'))
-  sessionStorage.setItem('token', window.prompt('Please enter a token:') ?? '')
-
-const ctx = { token: sessionStorage.getItem('token') ?? '' }
-const client = createWebSocketClient(undefined, ctx)
-const DB = createVanillaViewer<ionowType & { speedtest: number }>(client)
+const { matrix: MATRIX } = createVanillaViewer<Public>(client, 'public')
+const PLAYER = createVanillaViewer<Controls>(client, 'controls')
 
 const ctx2d = (document.getElementById('matrix') as HTMLCanvasElement).getContext('2d')!
 
-DB.matrix.$onnow = (matrix) => {
+MATRIX.$onnow = (matrix) => {
   const S = 40
   const pixel = (x: number, y_inv: number, col?: number) => {
     if (col !== undefined)
@@ -27,23 +23,36 @@ window.addEventListener('keydown', ({ key }) => {
   switch (key) {
     case 'ArrowUp':
       //@ts-expect-error
-      DB.controls.up()
+      PLAYER.up()
       break
     case 'ArrowDown':
       //@ts-expect-error
-      DB.controls.down()
+      PLAYER.down()
       break
     case 'ArrowLeft':
       //@ts-expect-error
-      DB.controls.left()
+      PLAYER.left()
       break
     case 'ArrowRight':
       //@ts-expect-error
-      DB.controls.right()
+      PLAYER.right()
       break
     case 'Enter':
       //@ts-expect-error
-      DB.controls.middle()
+      PLAYER.middle()
+      break
+    case '0':
+      selectUser('anonymous')
+      break
+    case '1':
+    case '2':
+    case '3':
+      selectUser('web-' + key)
       break
   }
 })
+
+addAccount('anonymous', '')
+login('web-1', '123')
+login('web-2', '456')
+login('web-3', '789')

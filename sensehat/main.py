@@ -1,7 +1,8 @@
 import asyncio
 
+from proxy import KcpProxyViewer
 from sense_hat import SenseHat
-from websocket import KisDBClient, KisDBViewer
+from websocket import KcpWebSocketClient
 
 sense = SenseHat()
 # sense.set_rotation(90)
@@ -22,7 +23,6 @@ def render(matrix, _=None):
     pixels = [BLACK] * 64
     value = int(0)
     for i, char in enumerate(matrix):
-        print(i)
         value = ord(char) - 48  # starts from ascii '0'
         pixels[i] = (
             85 * (value >> 4),
@@ -39,21 +39,22 @@ render("8888888888888888800880088008800888800888880000888800008888088088")
 
 async def main():
     print("started")
-    client = KisDBClient(
+    client = KcpWebSocketClient(
         "ws://192.168.0.20:3000/kisdb-ws",
         "94de889064a147c3a960d289356858dc6a384b2a90c04f078a47bd87ddef7137",
     )
     await asyncio.sleep(1)
-    DB = KisDBViewer(client)
+    PUBLIC = KcpProxyViewer(client, "public")
+    PLAYER = KcpProxyViewer(client, "controls")
 
-    await DB.matrix.onnow(render)
+    await PUBLIC.matrix.onnow(render)
 
     while 1:
         await asyncio.sleep(0.01)
         for event in sense.stick.get_events():
             if not event.action == "pressed":
                 continue
-            await getattr(DB.controls, event.direction)()
+            await getattr(PLAYER, event.direction)()
 
 
 if __name__ == "__main__":

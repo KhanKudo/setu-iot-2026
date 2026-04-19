@@ -1,63 +1,67 @@
 import { createSQLiteHandle, destroySQLiteHandle } from "@khankudo/kisdb/db/sqlite"
 import { createWebSocketConfig } from "@khankudo/kisdb/server/websocket"
 import { createDirectClient } from "@khankudo/kisdb/client/direct"
-import { createVanillaViewer, refUpdater, risingEdge } from "@khankudo/kisdb/viewer/vanilla"
+import { createVanillaViewer, refUpdater } from "@khankudo/kisdb/viewer/vanilla"
 import type { KCPTrustedContext } from "@khankudo/kisdb"
+import { createAdminHelper } from "@khankudo/kisdb/core/admin"
+import { EVERYONE, USERS } from "@khankudo/kisdb/core/auth"
+import { ensureData } from "@khankudo/kisdb/core/management"
 
 const handle = await createSQLiteHandle('../sqlite')
 
-const wsconf = createWebSocketConfig(handle)
+const admin = await createAdminHelper(handle, 'DEFAULT_PA$$WORD')
+const RASPI = await admin.ensureUser('raspi', null, true, '94de889064a147c3a960d289356858dc6a384b2a90c04f078a47bd87ddef7137')
+const WEB1 = await admin.ensureUser('web-1', '123', true)
+const WEB2 = await admin.ensureUser('web-2', '456', true)
+const WEB3 = await admin.ensureUser('web-3', '789', true)
+const SERVER = await admin.ensureUser('server', false, false, '33a7930d8e894b939d74532d546ef40dfd075f8cf9134f98b1180e6e6bb32165')
+await admin.ensureAccess('public', SERVER, EVERYONE, false, false)
+await admin.ensureAccess('controls', SERVER, false, false, USERS)
+await admin.ensureAccess('private', SERVER, false, false, false)
+await admin.destroy()
 
-const server = Bun.serve({
-  ...wsconf,
-  hostname: '0.0.0.0',
-  fetch(req, server) {
-    return new Response(Bun.file('../static/' + (URL.parse(req.url)?.pathname?.slice(1) || 'index.html')))
-  }
-})
+export type Public = {
+  matrix: string
+}
 
-console.log('Ready! ( http://localhost:3000 )')
+export type Controls = {
+  up(ctx: KCPTrustedContext): void
+  down(ctx: KCPTrustedContext): void
+  left(ctx: KCPTrustedContext): void
+  right(ctx: KCPTrustedContext): void
+  middle(ctx: KCPTrustedContext): void
+}
 
-export type ionowType = {
-  matrix: string,
+export type Private = {
   players: Record<number, {
     position: { x: number, y: number },
     color: number,
   }>
-  controls: {
-    up(ctx: KCPTrustedContext): void
-    down(ctx: KCPTrustedContext): void
-    left(ctx: KCPTrustedContext): void
-    right(ctx: KCPTrustedContext): void
-    middle(ctx: KCPTrustedContext): void
-  }
 }
-const direct = createDirectClient(handle, { connection: 0, token: Bun.env.SERVER_TOKEN ?? '' })
-const DB = createVanillaViewer<ionowType>(direct)
 
-const tst = await DB.players
-console.log('tst:', tst)
-if (tst === undefined) {
-  await DB.matrix('0'.repeat(64))
-  await DB.players({})
-  console.log('players reset!')
-}
+const direct = createDirectClient(handle, { connection: 0, token: '33a7930d8e894b939d74532d546ef40dfd075f8cf9134f98b1180e6e6bb32165' })
+await ensureData(direct, 'public', <Public>{
+  matrix: '000000000PPPPPP00P0000P00P0PP0P00P0PP0P00P0000P00PPPPPP000000000',
+}, false, false)
+await ensureData(direct, 'private', <Private>{
+  players: {}
+}, false, false)
+
+const { matrix: MATRIX } = createVanillaViewer<Public>(direct, 'public')
+const CONTROLS = createVanillaViewer<Controls>(direct, 'controls')
+const { players: PLAYERS } = createVanillaViewer<Private>(direct, 'private')
 
 function toMatrix(grid: number[]): string {
   return grid.reduce((str, x) => str + String.fromCharCode(48 + ((Math.floor(x / 0o100) << 4) | (Math.floor((x % 0o100) / 0o10) << 2) | (x % 0o10))), '')
 }
 
-const players = await DB.players ?? {} // TEMPORARY, TODO: fix cause of issue with empty object setting and listening
-console.log('players:', players)
-DB.players.$onnow = ps => {
-  console.log('ps:', ps)
-  if (!ps)
-    return
-  Object.assign(players, ps)
-  for (const p in players) {
+const localPlayers = await PLAYERS
+PLAYERS.$onnow = ps => {
+  Object.assign(localPlayers, ps)
+  for (const p in localPlayers) {
     if (p in ps)
       continue
-    delete players[p]
+    delete localPlayers[p]
   }
 }
 
@@ -65,46 +69,49 @@ function randi(max: number = 1, min: number = 0): number {
   return Math.round(Math.random() * (max - min)) + min
 }
 
-function getPlayer(id: number): ionowType['players'][0] {
-  const res = players[id] ??= {
-    position: { x: randi(7), y: randi(7) },
-    color: (randi(3) << 6) | (randi(3) << 3) | randi(3),
+function getPlayer(id: number): Private['players'][0] {
+  const exists = id in localPlayers
+
+  if (exists) {
+    return localPlayers[id]!
   }
-
-  console.log('get player:', res)
-
-  DB.players[id]?.(res)
-
-  return res
+  else {
+    localPlayers[id] = {
+      position: { x: randi(7), y: randi(7) },
+      color: (randi(3) << 6) | (randi(3) << 3) | randi(3),
+    }
+    PLAYERS[id]?.(localPlayers[id])
+    return localPlayers[id]
+  }
 }
 
-DB.controls.up = async ({ identity }) => {
+CONTROLS.up = async ({ identity }) => {
   const { position: { x, y } } = getPlayer(identity)
-  DB.players[identity]?.position.y((y + 1) % 8)
+  PLAYERS[identity]?.position.y((y + 1) % 8)
 }
-DB.controls.down = async ({ identity }) => {
+CONTROLS.down = async ({ identity }) => {
   const { position: { x, y } } = getPlayer(identity)
-  DB.players[identity]?.position.y((y + 8 - 1) % 8)
+  PLAYERS[identity]?.position.y((y + 8 - 1) % 8)
 }
-DB.controls.right = async ({ identity }) => {
+CONTROLS.right = async ({ identity }) => {
   const { position: { x, y } } = getPlayer(identity)
-  DB.players[identity]?.position.x((x + 1) % 8)
+  PLAYERS[identity]?.position.x((x + 1) % 8)
 }
-DB.controls.left = async ({ identity }) => {
+CONTROLS.left = async ({ identity }) => {
   const { position: { x, y } } = getPlayer(identity)
-  DB.players[identity]?.position.x((x + 8 - 1) % 8)
+  PLAYERS[identity]?.position.x((x + 8 - 1) % 8)
 }
-DB.controls.middle = async ({ identity }) => {
+CONTROLS.middle = async ({ identity }) => {
   const { color } = getPlayer(identity)
   switch (color) {
     case 0o000:
-      DB.players[identity]?.color(0o333)
+      PLAYERS[identity]?.color(0o333)
       break
     case 0o333:
-      DB.players[identity]?.color(0o300)
+      PLAYERS[identity]?.color(0o300)
       break
     default:
-      DB.players[identity]?.color(color >> 3)
+      PLAYERS[identity]?.color(color >> 3)
       break
   }
 }
@@ -127,8 +134,18 @@ refUpdater((players) => {
     grid[index] = color
   }
 
-  DB.matrix(toMatrix(grid))
-}, DB.players)
+  MATRIX(toMatrix(grid))
+}, PLAYERS)
+
+const wsconf = createWebSocketConfig(handle)
+const server = Bun.serve({
+  ...wsconf,
+  hostname: '0.0.0.0',
+  fetch(req, server) {
+    return new Response(Bun.file('../static/' + (URL.parse(req.url)?.pathname?.slice(1) || 'index.html')))
+  }
+})
+console.log('Ready! ( http://localhost:3000 )')
 
 process.on('exit', () => {
   server.stop(true)

@@ -41,6 +41,24 @@
                 left: 1em;
                 top: 2em;
             }
+
+            #accounts{
+                display: flex;
+                flex-direction: column;
+                width: fit-content;
+            }
+
+            #accounts button {
+                transition: all .5s;
+                border-radius: .5em;
+                outline: none;
+                padding: .2em;
+                margin: .25em;
+            }
+
+            #accounts .active {
+                background: green;
+            }
         </style>
     </head>
     <body>
@@ -52,6 +70,7 @@
           <div id="stick-right" onpointerdown="DB.stick.right(true)" onpointerup="DB.stick.right(false)">⯈</div>
           <div id="stick-down" onpointerdown="DB.stick.down(true)" onpointerup="DB.stick.down(false)">⯆</div>
         </div>
+        <div id="accounts"></div>
         <footer>
             <script src="browser.js"></script>
         </footer>
