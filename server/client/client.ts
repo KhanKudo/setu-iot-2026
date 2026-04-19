@@ -1,9 +1,8 @@
 import { createVanillaViewer } from "@khankudo/kisdb/viewer/vanilla"
-import type { Controls, Public } from "../index"
 import { addAccount, client, login, selectUser } from "./connection"
 
-const { matrix: MATRIX } = createVanillaViewer<Public>(client, 'public')
-const PLAYER = createVanillaViewer<Controls>(client, 'controls')
+const { matrix: MATRIX } = createVanillaViewer(client, 'public')
+const PLAYER = createVanillaViewer(client, 'controls')
 
 const ctx2d = (document.getElementById('matrix') as HTMLCanvasElement).getContext('2d')!
 

@@ -7,7 +7,26 @@ import { createAdminHelper } from "@khankudo/kisdb/core/admin"
 import { EVERYONE, USERS } from "@khankudo/kisdb/core/auth"
 import { ensureData } from "@khankudo/kisdb/core/management"
 
-const handle = await createSQLiteHandle('../sqlite')
+export type Database = {
+  public: {
+    matrix: string
+  }
+  controls: {
+    up(ctx: KCPTrustedContext): void
+    down(ctx: KCPTrustedContext): void
+    left(ctx: KCPTrustedContext): void
+    right(ctx: KCPTrustedContext): void
+    middle(ctx: KCPTrustedContext): void
+  }
+  private: {
+    players: Record<number, {
+      position: { x: number, y: number }
+      color: number
+    }>
+  }
+}
+
+const handle = await createSQLiteHandle<Database>('../sqlite')
 
 const admin = await createAdminHelper(handle, 'DEFAULT_PA$$WORD')
 const RASPI = await admin.ensureUser('raspi', null, true, '94de889064a147c3a960d289356858dc6a384b2a90c04f078a47bd87ddef7137')
@@ -20,36 +39,17 @@ await admin.ensureAccess('controls', SERVER, false, false, USERS)
 await admin.ensureAccess('private', SERVER, false, false, false)
 await admin.destroy()
 
-export type Public = {
-  matrix: string
-}
-
-export type Controls = {
-  up(ctx: KCPTrustedContext): void
-  down(ctx: KCPTrustedContext): void
-  left(ctx: KCPTrustedContext): void
-  right(ctx: KCPTrustedContext): void
-  middle(ctx: KCPTrustedContext): void
-}
-
-export type Private = {
-  players: Record<number, {
-    position: { x: number, y: number },
-    color: number,
-  }>
-}
-
 const direct = createDirectClient(handle, { connection: 0, token: '33a7930d8e894b939d74532d546ef40dfd075f8cf9134f98b1180e6e6bb32165' })
-await ensureData(direct, 'public', <Public>{
+await ensureData(direct, 'public', {
   matrix: '000000000PPPPPP00P0000P00P0PP0P00P0PP0P00P0000P00PPPPPP000000000',
 }, false, false)
-await ensureData(direct, 'private', <Private>{
+await ensureData(direct, 'private', {
   players: {}
 }, false, false)
 
-const { matrix: MATRIX } = createVanillaViewer<Public>(direct, 'public')
-const CONTROLS = createVanillaViewer<Controls>(direct, 'controls')
-const { players: PLAYERS } = createVanillaViewer<Private>(direct, 'private')
+const { matrix: MATRIX } = createVanillaViewer(direct, 'public')
+const CONTROLS = createVanillaViewer(direct, 'controls')
+const { players: PLAYERS } = createVanillaViewer(direct, 'private')
 
 function toMatrix(grid: number[]): string {
   return grid.reduce((str, x) => str + String.fromCharCode(48 + ((Math.floor(x / 0o100) << 4) | (Math.floor((x % 0o100) / 0o10) << 2) | (x % 0o10))), '')
@@ -69,7 +69,7 @@ function randi(max: number = 1, min: number = 0): number {
   return Math.round(Math.random() * (max - min)) + min
 }
 
-function getPlayer(id: number): Private['players'][0] {
+function getPlayer(id: number): Database['private']['players'][0] {
   const exists = id in localPlayers
 
   if (exists) {
