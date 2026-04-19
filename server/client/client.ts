@@ -1,10 +1,16 @@
 import { createVanillaViewer } from "@khankudo/kisdb/viewer/vanilla"
 import { addAccount, client, login, selectUser } from "./connection"
 
-const { matrix: MATRIX } = createVanillaViewer(client, 'public')
+const { matrix: MATRIX, game: GAME } = createVanillaViewer(client, 'public')
 const PLAYER = createVanillaViewer(client, 'controls')
 
 const ctx2d = (document.getElementById('matrix') as HTMLCanvasElement).getContext('2d')!
+
+GAME.$onnow = name => {
+  const title = document.getElementById('title')
+  if (title)
+    title.innerText = name
+}
 
 MATRIX.$onnow = (matrix) => {
   const S = 40
@@ -22,23 +28,23 @@ window.addEventListener('keydown', ({ key }) => {
   switch (key) {
     case 'ArrowUp':
       //@ts-expect-error
-      PLAYER.up()
+      PLAYER.up(true)
       break
     case 'ArrowDown':
       //@ts-expect-error
-      PLAYER.down()
+      PLAYER.down(true)
       break
     case 'ArrowLeft':
       //@ts-expect-error
-      PLAYER.left()
+      PLAYER.left(true)
       break
     case 'ArrowRight':
       //@ts-expect-error
-      PLAYER.right()
+      PLAYER.right(true)
       break
     case 'Enter':
       //@ts-expect-error
-      PLAYER.middle()
+      PLAYER.middle(true)
       break
     case '0':
       selectUser('anonymous')
@@ -47,6 +53,31 @@ window.addEventListener('keydown', ({ key }) => {
     case '2':
     case '3':
       selectUser('web-' + key)
+      break
+  }
+})
+
+window.addEventListener('keyup', ({ key }) => {
+  switch (key) {
+    case 'ArrowUp':
+      //@ts-expect-error
+      PLAYER.up(false)
+      break
+    case 'ArrowDown':
+      //@ts-expect-error
+      PLAYER.down(false)
+      break
+    case 'ArrowLeft':
+      //@ts-expect-error
+      PLAYER.left(false)
+      break
+    case 'ArrowRight':
+      //@ts-expect-error
+      PLAYER.right(false)
+      break
+    case 'Enter':
+      //@ts-expect-error
+      PLAYER.middle(false)
       break
   }
 })

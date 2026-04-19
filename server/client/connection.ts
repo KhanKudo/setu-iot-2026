@@ -1,6 +1,6 @@
 import { createWebSocketClient } from "@khankudo/kisdb/client/websocket"
 import { getToken } from "@khankudo/kisdb/core/management"
-import type { Database } from "../index"
+import type { Database } from "../src/db"
 
 const accounts: Record<string, { token: string }> = {}
 

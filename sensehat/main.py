@@ -57,9 +57,11 @@ async def main():
     while 1:
         await asyncio.sleep(0.01)
         for event in sense.stick.get_events():
-            if not event.action == "pressed":
+            if event.action == "held":
                 continue
-            await getattr(PLAYER, event.direction)()
+            await getattr(PLAYER, event.direction)(
+                True if event.action == "pressed" else False
+            )
 
 
 if __name__ == "__main__":
