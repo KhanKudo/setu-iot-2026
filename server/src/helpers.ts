@@ -1,6 +1,6 @@
 import type { DataType } from "@khankudo/kisdb";
 import type { ProxyType } from "@khankudo/kisdb/viewer/vanilla";
-import { R3 as R, G3 as G, B3 as B, Y3 as Y, O as _, W } from "./render"
+import { R3 as R, G3 as G, B3 as B, Y3 as Y, O as _, W, W1 as w } from "./render"
 import { activeHandle, type Controls } from "./game";
 
 export function randi(min: number = 0, max: number = 1): number {
@@ -112,9 +112,85 @@ export function bot(tick: (data: BotData) => void, tickRateMs: number = fps(20),
 
 // returns the selected player IDs
 export async function playerSelector(count: number, ...bots: BotType[]): Promise<{ i: number, id: number, color: number }[]> {
-  count -= bots.length
   if (!((bots.length > 0 ? 0 : 1) <= count && count <= 4))
-    throw new Error(`Invalid player selection parameters! Count: ${count} players (${count + bots.length} total - ${bots.length} bots), allowed 1-4`)
+    throw new Error(`Invalid player selection parameters! Count: ${count} players, allowed 1-4`)
+
+  const arrowLeft: Readonly<number[]> = [
+    _, _, _, _, _, _, _, _,
+    _, w, _, _, _, _, _, _,
+    _, w, _, _, _, _, _, _,
+    W, w, _, _, _, _, _, _,
+    W, w, _, _, _, _, _, _,
+    _, w, _, _, _, _, _, _,
+    _, w, _, _, _, _, _, _,
+    _, _, _, _, _, _, _, _,
+  ]
+  const arrowRight: Readonly<number[]> = [
+    _, _, _, _, _, _, _, _,
+    _, _, _, _, _, _, w, _,
+    _, _, _, _, _, _, w, _,
+    _, _, _, _, _, _, w, W,
+    _, _, _, _, _, _, w, W,
+    _, _, _, _, _, _, w, _,
+    _, _, _, _, _, _, w, _,
+    _, _, _, _, _, _, _, _,
+  ]
+
+  const countGrid: Readonly<number[][]> = [
+    [
+      _, W, W, W, _, _, _, _,
+      W, _, _, _, W, _, _, _,
+      W, _, _, _, W, _, _, _,
+      W, _, w, _, W, _, _, _,
+      W, _, w, _, W, _, _, _,
+      W, _, _, _, W, _, _, _,
+      W, _, _, _, W, _, _, _,
+      _, W, W, W, _, _, _, _,
+    ],
+    [
+      _, _, _, _, R, _, _, _,
+      _, _, _, R, R, _, _, _,
+      _, _, R, _, R, _, _, _,
+      _, _, _, _, R, _, _, _,
+      _, _, _, _, R, _, _, _,
+      _, _, _, _, R, _, _, _,
+      _, _, _, _, R, _, _, _,
+      _, _, _, _, R, _, _, _,
+    ],
+    [
+      _, _, G, G, G, G, _, _,
+      _, _, _, _, _, G, _, _,
+      _, _, _, _, _, G, _, _,
+      _, _, G, G, G, G, _, _,
+      _, _, G, _, _, _, _, _,
+      _, _, G, _, _, _, _, _,
+      _, _, G, _, _, _, _, _,
+      _, _, G, G, G, G, _, _,
+    ],
+    [
+      _, _, B, B, B, B, _, _,
+      _, _, _, _, _, B, _, _,
+      _, _, _, _, _, B, _, _,
+      _, _, B, B, B, B, _, _,
+      _, _, _, _, _, B, _, _,
+      _, _, _, _, _, B, _, _,
+      _, _, _, _, _, B, _, _,
+      _, _, B, B, B, B, _, _,
+    ],
+    [
+      _, _, _, _, _, Y, _, _,
+      _, _, _, _, Y, Y, _, _,
+      _, _, _, Y, _, Y, _, _,
+      _, _, Y, Y, Y, Y, _, _,
+      _, _, _, _, _, Y, _, _,
+      _, _, _, _, _, Y, _, _,
+      _, _, _, _, _, Y, _, _,
+      _, _, _, _, _, Y, _, _,
+    ],
+  ]
+
+  const min = Math.max(0, count - bots.length)
+  const max = count
 
   const handle = activeHandle
   if (!handle)
@@ -167,46 +243,78 @@ export async function playerSelector(count: number, ...bots: BotType[]): Promise
   return new Promise((resolve, reject) => {
     const selected: { i: number, id: number, color: number }[] = []
 
-    function makeBots() {
-      for (let i = count; i < count + bots.length; i++) {
-        const botId = bots[i - count]!.id
-
-        selected.push(<Omit<BotData, 'controls'>>{
-          i,
-          color: playerColors[i]!,
-          id: botId,
-          grid: activeHandle!.grid
-        })
-        bots[i - count]!.start(selected.at(-1) as Omit<BotData, 'controls'>)
-      }
-    }
-
-    if (count === 0) {
-      makeBots()
-      resolve(selected)
-      return
-    }
     let origInput = handle.input
     const stop = () => {
       handle.input = origInput
       reject('Stop called before promise could settle!')
     }
     onActiveStopped.add(stop)
-    handle.render(grid[0]!)
+    let chosenPlayerCount = bots.length ? null : count
+    let currentPC = count
+
+    function renderCountPick() {
+      Object.assign(handle!.grid, countGrid[currentPC]!)
+      for (let i = 0; i < 64; i++) {
+        if (currentPC > min && arrowLeft[i] !== 0)
+          handle!.grid[i] = arrowLeft[i]!
+        if (currentPC < max && arrowRight[i] !== 0)
+          handle!.grid[i] = arrowRight[i]!
+      }
+      handle!.render(handle!.grid)
+    }
+
+    if (bots.length) {
+      renderCountPick()
+    }
+    else {
+      handle.render(grid[0]!)
+    }
     const wasOn: Set<number> = new Set()
-    handle.input = (id, { middle }) => {
+    handle.input = (id, { middle, left, right }) => {
       if (selected.some(p => p.id === id))
         return
+
+      if (chosenPlayerCount === null && (left || right)) {
+        currentPC = clampi(currentPC - Number(left) + Number(right), min, max)
+        renderCountPick()
+        wasOn.delete(id)
+        return
+      }
 
       if (middle) {
         wasOn.add(id)
       }
       else if (wasOn.has(id)) {
-        selected.push({ id, i: selected.length, color: playerColors[selected.length]! })
-        if (selected.length === count) {
+        wasOn.delete(id)
+        if (chosenPlayerCount === null) {
+          chosenPlayerCount = currentPC
+          if (currentPC > 0) {
+            handle.render(grid[0]!)
+            if (currentPC > 1)
+              return
+          }
+        }
+
+        if (chosenPlayerCount > 0)
+          selected.push({ id, i: selected.length, color: playerColors[selected.length]! })
+
+        if (selected.length === chosenPlayerCount) {
           handle.input = origInput
           onActiveStopped.delete(stop)
-          makeBots()
+          handle.grid.fill(_)
+
+          for (let i = chosenPlayerCount; i < count; i++) {
+            const botId = bots[i - chosenPlayerCount]!.id
+
+            selected.push(<Omit<BotData, 'controls'>>{
+              i,
+              color: playerColors[i]!,
+              id: botId,
+              grid: handle.grid
+            })
+            bots[i - chosenPlayerCount]!.start(selected.at(-1) as Omit<BotData, 'controls'>)
+          }
+
           resolve(selected)
         }
         else {
