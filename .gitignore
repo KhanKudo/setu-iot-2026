@@ -1,2 +1,3 @@
 static/browser.js
 *.db
+__pycache__

@@ -1,5 +1,6 @@
-import { randi, type GameHandle } from "../game"
-import { B, G, O, R, W } from "../render"
+import { type GameHandle } from "../game"
+import { randi } from "../helpers"
+import { R, B, G, O, W } from "../render"
 
 type Save = {
   players: Record<number, {
@@ -12,8 +13,8 @@ let memory: Save
 
 function getPlayer(id: number) {
   return memory.players[id] ??= {
-    position: { x: randi(7), y: randi(7) },
-    color: (randi(3) << 6) | (randi(3) << 3) | randi(3),
+    position: { x: randi(0, 7), y: randi(0, 7) },
+    color: (randi(0, 3) << 6) | (randi(0, 3) << 3) | randi(0, 3),
   }
 }
 
@@ -94,6 +95,8 @@ export default function startGame(handle: GameHandle<Save>): () => void {
     }
     draw(handle.render)
   }
+
+  draw(handle.render)
 
   return () => {
 

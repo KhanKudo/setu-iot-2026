@@ -1,11 +1,10 @@
-import type { DataType } from "@khankudo/kisdb"
 import { CONTROLS, PRIVATE, PUBLIC, type Database } from "./db"
+import type { DataType } from "@khankudo/kisdb"
 import { renderMatrix } from "./render"
 import startDemo from "./games/demo"
-
-export function randi(max: number = 1, min: number = 0): number {
-  return Math.round(Math.random() * (max - min)) + min
-}
+import startPong from "./games/pong"
+import startGyro from "./games/gyro"
+import { onActiveStopped } from "./helpers"
 
 export type GameHandle<T extends DataType | undefined = any> = {
   render: typeof renderMatrix
@@ -18,9 +17,10 @@ export type GameHandle<T extends DataType | undefined = any> = {
   middle?: (id: number, state: boolean) => void
   memory?: Partial<T>
   save: Readonly<() => Promise<void>>
+  grid: number[]
 }
 
-export type Controls = Record<keyof Database['controls'], boolean>
+export type Controls = Record<keyof Omit<Database['controls'], 'imu'>, boolean>
 
 const controls: Record<number, Controls> = {}
 
@@ -103,7 +103,7 @@ CONTROLS.middle = async ({ identity }, state) => {
 }
 
 let activeGame: Database['public']['game'] | null = null
-let activeHandle: GameHandle | null = null
+export let activeHandle: GameHandle | null = null
 let stopActive: () => void = () => { }
 
 PUBLIC.game.$onnow = async game => {
@@ -113,6 +113,9 @@ PUBLIC.game.$onnow = async game => {
   const newGameSave = game === null ? null : PRIVATE.gamedata[game]()
 
   if (activeGame !== null) {
+    for (const func of onActiveStopped)
+      func()
+    onActiveStopped.clear()
     stopActive()
     PRIVATE.gamedata[activeGame](activeHandle?.memory)
   }
@@ -127,21 +130,29 @@ PUBLIC.game.$onnow = async game => {
     controls,
     render: renderMatrix,
     memory,
+    grid: new Array(64).fill(0),
     save: async () => {
       await PRIVATE.gamedata[game](memory)
     },
   }
 
-  switch (game) {
-    case 'demo':
-      stopActive = startDemo(activeHandle)
-      break
-    case 'pong':
-      console.warn('PONG is not yet defined!')
-      break
-    default:
-      stopActive = () => { }
-      console.error(`UNKNOWN GAME SELECTED: "${game}"`)
+  try {
+    switch (game) {
+      case 'demo':
+        stopActive = startDemo(activeHandle)
+        break
+      case 'pong':
+        stopActive = startPong(activeHandle)
+        break
+      case 'gyro':
+        stopActive = startGyro(activeHandle)
+        break
+      default:
+        stopActive = () => { }
+        console.error(`UNKNOWN GAME SELECTED: "${game}"`)
+    }
+  } catch (err) {
+    console.error(`Game [${game}] failed to start with error:`, err)
   }
 }
 

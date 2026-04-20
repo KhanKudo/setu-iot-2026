@@ -38,6 +38,11 @@ export const Y3 = 3 * Y1
 export const K = O
 // ----- colors -----
 
+let lastMatrix: string | null = null
 export function renderMatrix(grid8x8rgb: number[]) {
-  PUBLIC.matrix(toMatrix(grid8x8rgb))
+  const matrix = toMatrix(grid8x8rgb)
+  if (lastMatrix === matrix)
+    return
+  lastMatrix = matrix
+  PUBLIC.matrix(matrix)
 }

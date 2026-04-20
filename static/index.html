@@ -4,7 +4,9 @@
         <title>Project IoNoW</title>
         <style>
             #stick {
-                position: relative;
+                position: absolute;
+                right: 3rem;
+                bottom: 5rem;
                 width: 3em;
                 height: 3em;
                 font-size: 6.5em;
@@ -42,36 +44,75 @@
                 top: 2em;
             }
 
-            #accounts{
+            #accounts, #games{
                 display: flex;
                 flex-direction: column;
                 width: fit-content;
             }
 
-            #accounts button {
+            #accounts button, #games button {
                 transition: all .5s;
                 border-radius: .5em;
                 outline: none;
                 padding: .2em;
                 margin: .25em;
+                cursor: pointer;
             }
 
             #accounts .active {
                 background: green;
             }
+
+            #games .active {
+                background: darkorange;
+            }
+
+            #selectors{
+                display: flex;
+                flex-direction: row;
+            }
+
+            #connections {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                max-width: 10em;
+                width: fit-content;
+                border-radius: .5em;
+                padding: .25em;
+                background-color: #ccc;
+                position: absolute;
+                top: 2em;
+                right: 2em;
+            }
+
+            #connections>div {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: .15em;
+                width: 2em;
+                height: 2em;
+                border-radius: .5em;
+                background-color: mediumaquamarine;
+            }
         </style>
     </head>
     <body>
+        <div id="connections"></div>
         <h1 id="title">Game Title</h1>
         <canvas id="matrix" width="320" height="320"></canvas>
         <div id="stick">
-          <div id="stick-up" onpointerdown="DB.stick.up(true)" onpointerup="DB.stick.up(false)">⯅</div>
-          <div id="stick-left" onpointerdown="DB.stick.left(true)" onpointerup="DB.stick.left(false)">⯇</div>
-          <div id="stick-middle" onpointerdown="DB.stick.middle(true)" onpointerup="DB.stick.middle(false)">●</div>
-          <div id="stick-right" onpointerdown="DB.stick.right(true)" onpointerup="DB.stick.right(false)">⯈</div>
-          <div id="stick-down" onpointerdown="DB.stick.down(true)" onpointerup="DB.stick.down(false)">⯆</div>
+          <div id="stick-up" onpointerdown="PLAYER.up(true)" onpointerup="PLAYER.up(false)">⯅</div>
+          <div id="stick-left" onpointerdown="PLAYER.left(true)" onpointerup="PLAYER.left(false)">⯇</div>
+          <div id="stick-middle" onpointerdown="PLAYER.middle(true)" onpointerup="PLAYER.middle(false)">●</div>
+          <div id="stick-right" onpointerdown="PLAYER.right(true)" onpointerup="PLAYER.right(false)">⯈</div>
+          <div id="stick-down" onpointerdown="PLAYER.down(true)" onpointerup="PLAYER.down(false)">⯆</div>
         </div>
-        <div id="accounts"></div>
+        <div id="selectors">
+            <div id="accounts"></div>
+            <div id="games"></div>
+        </div>
         <footer>
             <script src="browser.js"></script>
         </footer>

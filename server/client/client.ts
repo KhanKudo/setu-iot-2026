@@ -1,15 +1,44 @@
 import { createVanillaViewer } from "@khankudo/kisdb/viewer/vanilla"
 import { addAccount, client, isConnected, login, selectUser } from "./connection"
+import type { GameId } from "../src/db"
 
-const { matrix: MATRIX, game: GAME } = createVanillaViewer(client, 'public')
+const { matrix: MATRIX, game: GAME, gamelist: GAMELIST, selectGame: SELECT_GAME, connections: CONNS } = createVanillaViewer(client, 'public')
 const PLAYER = createVanillaViewer(client, 'controls')
 
 const ctx2d = (document.getElementById('matrix') as HTMLCanvasElement).getContext('2d')!
+
+let activeGame: GameId | null = null
 
 GAME.$onnow = name => {
   const title = document.getElementById('title')
   if (title)
     title.innerText = name
+
+  if (activeGame)
+    document.querySelector('#game-' + activeGame)?.classList.remove('active')
+
+  if (name)
+    document.querySelector('#game-' + name)?.classList.add('active')
+
+  activeGame = name
+}
+
+GAMELIST.$onnow = (games) => {
+  const list = document.getElementById('games')
+  if (!list)
+    return console.warn('NO GAMES LIST ELEM FOUND')
+
+  list.innerHTML = ''
+  for (const game of games) {
+    const btn = document.createElement('button')
+    btn.id = 'game-' + game
+    btn.classList.toggle('active', game === activeGame)
+    btn.innerText = game
+    btn.onclick = () => {
+      SELECT_GAME(game)
+    }
+    list.appendChild(btn)
+  }
 }
 
 function render(matrix: string) {
@@ -24,6 +53,17 @@ function render(matrix: string) {
   }
 }
 MATRIX.$onnow = render
+
+CONNS.$onnow = conns => {
+  const list = document.getElementById('connections')
+  if (!list)
+    throw new Error('NO CONNECTIONS LIST ELEM')
+
+  list.innerHTML = conns
+    .map(c => `<div>${c}</div>`)
+    .join('\n')
+}
+
 //splashscreen
 render("8888888888888888800880088008800888800888880000888800008888088088")
 isConnected(ok => {
@@ -34,23 +74,18 @@ isConnected(ok => {
 window.addEventListener('keydown', ({ key }) => {
   switch (key) {
     case 'ArrowUp':
-      //@ts-expect-error
       PLAYER.up(true)
       break
     case 'ArrowDown':
-      //@ts-expect-error
       PLAYER.down(true)
       break
     case 'ArrowLeft':
-      //@ts-expect-error
       PLAYER.left(true)
       break
     case 'ArrowRight':
-      //@ts-expect-error
       PLAYER.right(true)
       break
     case 'Enter':
-      //@ts-expect-error
       PLAYER.middle(true)
       break
     case '0':
@@ -67,23 +102,18 @@ window.addEventListener('keydown', ({ key }) => {
 window.addEventListener('keyup', ({ key }) => {
   switch (key) {
     case 'ArrowUp':
-      //@ts-expect-error
       PLAYER.up(false)
       break
     case 'ArrowDown':
-      //@ts-expect-error
       PLAYER.down(false)
       break
     case 'ArrowLeft':
-      //@ts-expect-error
       PLAYER.left(false)
       break
     case 'ArrowRight':
-      //@ts-expect-error
       PLAYER.right(false)
       break
     case 'Enter':
-      //@ts-expect-error
       PLAYER.middle(false)
       break
   }
