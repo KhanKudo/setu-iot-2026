@@ -1,6 +1,6 @@
 import { type GameHandle } from "../game"
 import { after, bot, fps, gameloop, playerSelector, randi, type BotData } from "../helpers"
-import { O as _, W, draw, R, G1, G3, G, drawNumber, findPixel, Y } from "../render"
+import { O as _, W, draw, R, G1, G3, G, drawNumber, findPixel, Y, getPixel, M } from "../render"
 
 type XY = { x: number, y: number }
 
@@ -15,11 +15,18 @@ const COLOR_SNAKE_HEAD = G3
 const COLOR_SNAKE_BODY = G
 const COLOR_SNAKE_TAIL = G1
 
-const GAME_FPS = 2
+let GAME_FPS = 2
 
-export default function startGame(handle: GameHandle<{ highscore: number }>): () => void {
-  handle.memory ??= { highscore: 0 }
+type Save = {
+  highscore: number,
+  pbs: Record<number, number>,
+}
+
+export default function startGame(handle: GameHandle<Save>): () => void {
+  handle.memory ??= { highscore: 0, pbs: {} }
   handle.memory.highscore ??= 0
+  handle.memory.pbs ??= {}
+
   const { grid, memory } = handle
 
   const snake: XY[] = []
@@ -113,6 +120,10 @@ export default function startGame(handle: GameHandle<{ highscore: number }>): ()
 
   after(playerSelector(1, bot(snakeBot)), players => {
     const P = players[0]!
+
+    if (P.id < 0) // is bot
+      GAME_FPS *= 2
+
     handle.up = (id, state) => {
       if (id === P.id && state)
         direction = 0
@@ -130,15 +141,42 @@ export default function startGame(handle: GameHandle<{ highscore: number }>): ()
         direction = 3
     }
     handle.middle = (id, state) => {
-      if (id === P.id && state && paused > 1 * GAME_FPS)
-        paused = 1 * GAME_FPS
+      if (id === P.id && state && paused > 0.5 * GAME_FPS)
+        paused = 0.5 * GAME_FPS
     }
     let showHighscore = false
+    let beatHighscore = false
+    let showPB = false
+    let beatPB = false
     let newGame = true
     let paused: number = 0
     gameloop(() => {
+      if (beatPB) {
+        grid.fill(paused % 2 ? _ : Y)
+        drawNumber(grid, memory.pbs[P.id]!, paused % 2 ? Y : _, memory.pbs[P.id]! < 10 ? 5 : 7)
+
+        if (paused <= 0)
+          beatPB = false
+      }
+      if (beatHighscore) {
+        grid.fill(paused % 2 ? _ : M)
+        drawNumber(grid, memory.highscore, paused % 2 ? M : _, memory.highscore < 10 ? 5 : 7)
+
+        if (paused <= 0)
+          beatHighscore = false
+      }
+
       if (paused > 0) {
         paused--
+
+        return
+      }
+
+      if (showPB) {
+        paused = GAME_FPS * 2
+        showPB = false
+        grid.fill(_)
+        drawNumber(grid, memory.pbs[P.id]!, Y, memory.pbs[P.id]! < 10 ? 5 : 7)
         return
       }
 
@@ -146,7 +184,7 @@ export default function startGame(handle: GameHandle<{ highscore: number }>): ()
         paused = GAME_FPS * 2
         showHighscore = false
         grid.fill(_)
-        drawNumber(grid, memory.highscore, Y, memory.highscore < 10 ? 5 : 7)
+        drawNumber(grid, memory.highscore, M, memory.highscore < 10 ? 5 : 7)
         return
       }
 
@@ -165,13 +203,25 @@ export default function startGame(handle: GameHandle<{ highscore: number }>): ()
         newGame = true
         grid.fill(_)
         const score = snake.length - 3
-        if (score > memory.highscore) {
-          paused = GAME_FPS * 5
-          memory.highscore = score
-          drawNumber(grid, score, Y, score < 10 ? 5 : 7)
+        if (score > (memory.pbs[P.id] ?? 0)) {
+          memory.pbs[P.id] = score
+
+          if (P.id > 0 && score > memory.highscore) {
+            paused = GAME_FPS * 10
+            beatHighscore = true
+            memory.highscore = score
+            drawNumber(grid, score, M, score < 10 ? 5 : 7)
+          }
+          else {
+            paused = GAME_FPS * 5
+            beatPB = true
+            showHighscore = true
+            drawNumber(grid, score, Y, score < 10 ? 5 : 7)
+          }
         }
         else {
           paused = GAME_FPS * 3
+          showPB = true
           showHighscore = true
           drawNumber(grid, score, W, score < 10 ? 5 : 7)
         }
@@ -195,10 +245,28 @@ function snakeBot({ controls, grid }: BotData) {
     return
   }
 
-  controls.up = apple.y > head.y
-  controls.down = apple.y < head.y
-  const ud = controls.up || controls.down
-  controls.left = !ud && apple.x < head.x
-  controls.right = !ud && apple.x > head.x
+  const U = head.y < 7 && !(getPixel(grid, head.x, head.y + 1) & G3)
+  const D = head.y > 0 && !(getPixel(grid, head.x, head.y - 1) & G3)
+  const L = head.x > 0 && !(getPixel(grid, head.x - 1, head.y) & G3)
+  const R = head.x < 7 && !(getPixel(grid, head.x + 1, head.y) & G3)
+
+  controls.up = U && apple.y > head.y
+  controls.down = D && apple.y < head.y
+
+  controls.left = L && apple.x < head.x
+  controls.right = R && apple.x > head.x
+
+  if (!controls.up && !controls.down && !controls.left && !controls.right) {
+    if (U)
+      controls.up = true
+    else if (D)
+      controls.down = true
+    else if (R)
+      controls.right = true
+    else if (L)
+      controls.left = true
+    // else fu**ed
+  }
+
   controls.middle = false
 }

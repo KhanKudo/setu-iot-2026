@@ -83,13 +83,21 @@ async def main():
     await PUBLIC.game.onnow(activeScreen)
     await PUBLIC.matrix.onnow(render)
 
+    count = 0
     while 1:
         try:
             await asyncio.sleep(0.01)
 
             for event in sense.stick.get_events():
-                if event.action == "held" or not connected:
+                if event.action == "held":
                     continue
+                if (
+                    not connected
+                    and event.action == "pressed"
+                    and event.direction == "middle"
+                ):
+                    exit(1)
+
                 await getattr(PLAYER, event.direction)(
                     True if event.action == "pressed" else False
                 )
@@ -97,9 +105,12 @@ async def main():
             if not connected:
                 continue
 
+            count += 1
+
             if selected == "gyro":
                 await PLAYER.gyro(gyro())
-            elif selected == "accel":
+            elif selected == "accel" or count >= 20:  # roughly 5 Hz
+                count = 0
                 await PLAYER.accel(accel())
         except Exception as err:
             print(err)
