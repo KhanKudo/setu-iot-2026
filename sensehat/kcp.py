@@ -1,3 +1,6 @@
+#
+# Note that the python implementations were decently (not entirely) aided by LLM Gemini
+#
 from typing import Any, Callable, Dict, List, Optional, Protocol, TypeAlias, Union
 
 # Type Aliases for KCP Standard
