@@ -6,16 +6,19 @@ import { ensureData } from "@khankudo/kisdb/core/management"
 import { createSQLiteHandle, destroySQLiteHandle } from "@khankudo/kisdb/db/sqlite"
 import { createVanillaViewer } from "@khankudo/kisdb/viewer/vanilla"
 
-export const gameIds = ['demo', 'pong', 'gyro'] as const
+export const gameIds = ['demo', 'pong', 'imu'] as const
 export type GameId = typeof gameIds[number]
 
-export type Database = {
+export type KisDB = {
   public: {
     matrix: string
     game: GameId
     imu: {
-      roll: number
+      x: number
+      y: number
+      z: number
       pitch: number
+      roll: number
       yaw: number
     }
     connections: number[]
@@ -28,14 +31,14 @@ export type Database = {
     left(state?: boolean): void
     right(state?: boolean): void
     middle(state?: boolean): void
-    imu([roll, pitch, yaw]: number[]): void
+    imu([x, y, z, pitch, roll, yaw]: number[]): void
   }
   private: {
     gamedata: Partial<Record<GameId, DataType | undefined>>
   }
 }
 
-export const handle = await createSQLiteHandle<Database>('../../sqlite')
+export const handle = await createSQLiteHandle<KisDB>('../../sqlite')
 
 const admin = await createAdminHelper(handle, 'DEFAULT_PA$$WORD')
 const RASPI = await admin.ensureUser('raspi', null, true, '94de889064a147c3a960d289356858dc6a384b2a90c04f078a47bd87ddef7137')
@@ -54,8 +57,11 @@ await ensureData(direct, 'public', {
   game: 'demo',
   gamelist: [],
   imu: {
-    roll: 0,
+    x: 0,
+    y: 0,
+    z: 0,
     pitch: 0,
+    roll: 0,
     yaw: 0,
   },
   connections: [],

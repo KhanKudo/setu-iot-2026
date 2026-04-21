@@ -29,8 +29,11 @@ PUBLIC.selectGame = async (_, game) => {
     await PUBLIC.game(game as any)
 }
 
-CONTROLS.imu = async (_, [roll, pitch, yaw]) => {
+CONTROLS.imu = async (_, [x, y, z, pitch, roll, yaw]) => {
   PUBLIC.imu({
+    x: x ?? 0,
+    y: y ?? 0,
+    z: z ?? 0,
     roll: roll ?? 0,
     pitch: pitch ?? 0,
     yaw: yaw ?? 0,
