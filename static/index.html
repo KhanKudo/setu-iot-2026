@@ -29,12 +29,40 @@
                 border-color: orange;
                 filter: none;
             }
+
+            #links {
+                position: absolute;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-evenly;
+                gap: 1em;
+                padding: .5em;
+                bottom: 1em;
+                min-width: 50%;
+            }
+
+            #links>a{
+                text-decoration: none;
+                font-family: Arial;
+                border: 1px solid seagreen;
+                color: mediumseagreen;
+                background-color: #0f03;
+                border-radius: 1em;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 1.35em;
+                padding: .15em .4em;
+            }
         </style>
     </head>
     <body>
         <iframe src="/demo.html?proto=http"></iframe>
         <iframe src="/demo.html?proto=ws"></iframe>
         <iframe src="/demo.html?proto=mqtt"></iframe>
+        <div id="links">
+            <a href="/kisdb/public">Inspect PUBLIC data</a>
+            <a href="/kisdb/private?token=readonly">Inspect PRIVATE data</a>
+        </div>
 
         <script>
           function checkFocus() {

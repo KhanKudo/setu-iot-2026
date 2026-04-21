@@ -63,11 +63,14 @@ export type BotType = {
   stop(): void
 }
 
-let botId = -1
-export function bot(tick: (data: BotData) => void, tickRateMs: number = fps(20), autorelease: boolean = false): BotType {
+let botIdCounter = -1
+export function resetBotCounter() {
+  botIdCounter = -1
+}
+export function bot(tick: (data: BotData) => void, tickRateMs: number = fps(20), autorelease: boolean = false, botId: number = botIdCounter--): BotType {
   let stopFunc: (() => void) | null = null
   const id = botId
-  botId--
+
   return {
     id,
     start(data) {

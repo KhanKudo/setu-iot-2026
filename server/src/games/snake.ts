@@ -15,8 +15,6 @@ const COLOR_SNAKE_HEAD = G3
 const COLOR_SNAKE_BODY = G
 const COLOR_SNAKE_TAIL = G1
 
-let GAME_FPS = 2
-
 type Save = {
   highscore: number,
   pbs: Record<number, number>,
@@ -120,9 +118,7 @@ export default function startGame(handle: GameHandle<Save>): () => void {
 
   after(playerSelector(1, bot(snakeBot)), players => {
     const P = players[0]!
-
-    if (P.id < 0) // is bot
-      GAME_FPS *= 2
+    const GAME_FPS = P.id < 0 ? 6 : 2
 
     handle.up = (id, state) => {
       if (id === P.id && state)
@@ -218,6 +214,8 @@ export default function startGame(handle: GameHandle<Save>): () => void {
             showHighscore = true
             drawNumber(grid, score, Y, score < 10 ? 5 : 7)
           }
+          // even with autosave before-exit, a manual save doesn't hurt.
+          handle.save()
         }
         else {
           paused = GAME_FPS * 3

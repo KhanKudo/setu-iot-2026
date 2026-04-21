@@ -6,7 +6,7 @@ import startPong from "./games/pong"
 import startSnake from "./games/snake"
 import startAccel from "./games/accel"
 import startGyro from "./games/gyro"
-import { onActiveStopped } from "./helpers"
+import { onActiveStopped, resetBotCounter } from "./helpers"
 
 export type GameHandle<T extends DataType | undefined = any> = {
   render: typeof renderMatrix
@@ -18,7 +18,7 @@ export type GameHandle<T extends DataType | undefined = any> = {
   right?: (id: number, state: boolean) => void
   middle?: (id: number, state: boolean) => void
   memory?: T
-  save: Readonly<() => Promise<void>>
+  save: () => Promise<void>
   grid: number[]
 }
 
@@ -141,6 +141,7 @@ PUBLIC.game.$onnow = async game => {
   }
 
   try {
+    resetBotCounter()
     switch (game) {
       case 'demo':
         stopActive = startDemo(activeHandle)
