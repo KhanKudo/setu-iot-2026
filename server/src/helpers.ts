@@ -10,6 +10,9 @@ export function randi(min: number = 0, max: number = 1): number {
 export function clampi(num: number, min: number = 0, max: number = 7): number {
   return Math.min(max, Math.max(min, Math.round(num)))
 }
+export function clampf(num: number, min: number = -1, max: number = 1): number {
+  return Math.min(max, Math.max(min, num))
+}
 
 const cooldowns: Map<any, number> = new Map()
 export function cooldown(id: any, periodMs: number): boolean {
@@ -355,13 +358,4 @@ export function gameloop(loop: () => void | null, intervalMs: number, callnow: b
 // converts frames per second (f/Hz) into a timer period (T/ms) - uses Math.round
 export function fps(hertz: number): number {
   return Math.round(1000 / hertz)
-}
-
-// grid must be 8x8
-export function draw(grid: number[], color: number, x: number, y: number, w: number = 1, h: number = 1) {
-  for (let i = Math.max(0, x); i < Math.min(8, x + w); i++) {
-    for (let j = Math.max(0, y); j < Math.min(8, y + h); j++) {
-      grid[i + (7 - j) * 8] = color
-    }
-  }
 }

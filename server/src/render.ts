@@ -1,4 +1,5 @@
 import { PUBLIC } from "./db"
+import { clampf } from "./helpers"
 
 function toMatrix(grid: number[]): string {
   return grid.reduce((str, x) => str + String.fromCharCode(48 + ((Math.floor(x / 0o100) << 4) | (Math.floor((x % 0o100) / 0o10) << 2) | (x % 0o10))), '')
@@ -45,4 +46,44 @@ export function renderMatrix(grid8x8rgb: number[]) {
     return
   lastMatrix = matrix
   PUBLIC.matrix(matrix)
+}
+
+// grid must be 8x8
+export function draw(grid: number[], color: number, x: number, y: number, w: number = 1, h: number = 1) {
+  for (let i = Math.max(0, x); i < Math.min(8, x + w); i++) {
+    for (let j = Math.max(0, y); j < Math.min(8, y + h); j++) {
+      grid[i + (7 - j) * 8] = color
+    }
+  }
+}
+
+// posY -> the lower y-coordinate of the deltaline
+// color1 -> lowest brightness of select color, must still be valid after col*2 and col*3
+// valueNorm -> -1..1 (is auto-clamped)
+export function deltaLine(grid: number[], valueNorm: number, posY: number = 0, color1: number = W1, height: number = 1, posX: number = 4, screenWidth: number = 8) {
+  const RES = 3
+  const HIGH = height
+  const x = Math.round(Math.abs(clampf(valueNorm, -1, 1)) * screenWidth * RES)
+  if (x === 0)
+    return
+
+  const wx = Math.floor(x / (RES * HIGH))
+  const rx = Math.round(x % (RES * HIGH))
+
+  if (valueNorm > 0) {
+    draw(grid, color1 * RES, posX, posY, wx, HIGH)
+    const hx = Math.floor(rx / HIGH)
+    if (hx > 0)
+      draw(grid, color1 * hx, posX + wx, posY, 1, HIGH)
+    if (rx % HIGH)
+      draw(grid, color1 * (hx + 1), posX + wx, posY, 1, rx % HIGH)
+  }
+  else if (valueNorm < 0) {
+    draw(grid, color1 * RES, posX - wx, posY, wx, HIGH)
+    const hx = Math.floor(rx / HIGH)
+    if (hx > 0)
+      draw(grid, color1 * hx, posX - wx - 1, posY, 1, HIGH)
+    if (rx % HIGH)
+      draw(grid, color1 * (hx + 1), posX - wx - 1, posY, 1, rx % HIGH)
+  }
 }

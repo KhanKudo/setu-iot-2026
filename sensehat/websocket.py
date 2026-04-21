@@ -87,7 +87,7 @@ class KcpWebSocketClient:
 
         payload = [id_val, key, value] if has_value else [id_val, key]
         await self.send_raw_data(*payload)
-        return await asyncio.wait_for(future, timeout=60.0)
+        return await asyncio.wait_for(future, timeout=1.0)
 
     async def send_raw_data(self, *data):
         if not self.ws:

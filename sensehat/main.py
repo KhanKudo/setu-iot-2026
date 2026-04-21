@@ -15,16 +15,20 @@ print(sense.get_temperature_from_humidity())
 print(sense.get_humidity())
 
 
-def sensors():
+def gyro():
     o = sense.get_orientation()
     pitch = o["pitch"]
     roll = o["roll"]
     yaw = o["yaw"]
+    return [pitch, roll, yaw]
+
+
+def accel():
     a = sense.get_accelerometer_raw()
     x = a["x"]
     y = a["y"]
     z = a["z"]
-    return [x, y, z, pitch, roll, yaw]
+    return [x, y, z]
 
 
 def render(matrix, _=None):
@@ -61,6 +65,12 @@ async def main():
         if not ok:
             splashscreen()
 
+    selected = ""
+
+    def activeScreen(game, _):
+        nonlocal selected
+        selected = game
+
     client = KcpWebSocketClient(
         "ws://192.168.0.20:3000/kisdb-ws",
         "94de889064a147c3a960d289356858dc6a384b2a90c04f078a47bd87ddef7137",
@@ -70,12 +80,11 @@ async def main():
     PUBLIC = KcpProxyViewer(client, "public")
     PLAYER = KcpProxyViewer(client, "controls")
 
+    await PUBLIC.game.onnow(activeScreen)
     await PUBLIC.matrix.onnow(render)
 
-    count = 0
     while 1:
         try:
-            sensors()  # frequent reading helps with accuracy, even if discarded
             await asyncio.sleep(0.01)
 
             for event in sense.stick.get_events():
@@ -85,16 +94,13 @@ async def main():
                     True if event.action == "pressed" else False
                 )
 
-            sensors()  # frequent reading helps with accuracy, even if discarded
-
             if not connected:
-                count = 45
                 continue
 
-            count += 1
-            if count >= 50:  # about 2 Hz
-                count = 0
-                await PLAYER.imu(sensors())
+            if selected == "gyro":
+                await PLAYER.gyro(gyro())
+            elif selected == "accel":
+                await PLAYER.accel(accel())
         except Exception as err:
             print(err)
 

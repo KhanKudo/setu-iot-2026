@@ -9,40 +9,38 @@ type Save = {
   }>
 }
 
-let memory: Save
-
-function getPlayer(id: number) {
-  return memory.players[id] ??= {
-    position: { x: randi(0, 7), y: randi(0, 7) },
-    color: (randi(0, 3) << 6) | (randi(0, 3) << 3) | randi(0, 3),
-  }
-}
-
-function draw(render: GameHandle['render']) {
-  const _ = O
-  const grid = [
-    _, B, _, _, _, _, W, _,
-    B, B, _, _, _, _, W, W,
-    _, _, _, _, _, _, _, _,
-    _, _, _, _, _, _, _, _,
-    _, _, _, _, _, _, _, _,
-    _, _, _, _, _, _, _, _,
-    G, G, _, _, _, _, R, R,
-    _, G, _, _, _, _, R, _,
-  ]
-
-  for (const id in memory.players) {
-    const { position: { x, y }, color } = memory.players[id]!
-    const index = x + (7 - y) * 8
-    grid[index] = color
-  }
-
-  render(grid)
-}
-
 export default function startGame(handle: GameHandle<Save>): () => void {
-  memory = handle.memory = {
-    players: handle?.memory?.players ?? {}
+  handle.memory = {
+    players: handle.memory?.players ?? {}
+  }
+
+  function getPlayer(id: number) {
+    return handle.memory!.players![id] ??= {
+      position: { x: randi(0, 7), y: randi(0, 7) },
+      color: (randi(0, 3) << 6) | (randi(0, 3) << 3) | randi(0, 3),
+    }
+  }
+
+  function draw(render: GameHandle['render']) {
+    const _ = O
+    const grid = [
+      _, B, _, _, _, _, W, _,
+      B, B, _, _, _, _, W, W,
+      _, _, _, _, _, _, _, _,
+      _, _, _, _, _, _, _, _,
+      _, _, _, _, _, _, _, _,
+      _, _, _, _, _, _, _, _,
+      G, G, _, _, _, _, R, R,
+      _, G, _, _, _, _, R, _,
+    ]
+
+    for (const id in handle.memory!.players!) {
+      const { position: { x, y }, color } = handle.memory!.players[id]!
+      const index = x + (7 - y) * 8
+      grid[index] = color
+    }
+
+    render(grid)
   }
 
   handle.up = (id, state) => {

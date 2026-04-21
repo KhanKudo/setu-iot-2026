@@ -1,6 +1,6 @@
 import { type GameHandle } from "../game"
-import { after, bot, clampi, cooldown, draw, fps, gameloop, playerSelector, randi, type BotData } from "../helpers"
-import { R, B, G, O as _, W } from "../render"
+import { after, bot, clampi, cooldown, fps, gameloop, playerSelector, randi, type BotData } from "../helpers"
+import { O as _, W, draw } from "../render"
 
 export default function startGame(handle: GameHandle): () => void {
   const pos: [number, number] = [0, 0]

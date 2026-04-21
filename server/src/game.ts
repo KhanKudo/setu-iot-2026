@@ -3,7 +3,8 @@ import type { DataType } from "@khankudo/kisdb"
 import { renderMatrix } from "./render"
 import startDemo from "./games/demo"
 import startPong from "./games/pong"
-import startIMU from "./games/imu"
+import startAccel from "./games/accel"
+import startGyro from "./games/gyro"
 import { onActiveStopped } from "./helpers"
 
 export type GameHandle<T extends DataType | undefined = any> = {
@@ -20,7 +21,7 @@ export type GameHandle<T extends DataType | undefined = any> = {
   grid: number[]
 }
 
-export type Controls = Record<keyof Omit<KisDB['controls'], 'imu'>, boolean>
+export type Controls = Record<keyof Omit<KisDB['controls'], 'gyro' | 'accel'>, boolean>
 
 const controls: Record<number, Controls> = {}
 
@@ -144,8 +145,11 @@ PUBLIC.game.$onnow = async game => {
       case 'pong':
         stopActive = startPong(activeHandle)
         break
-      case 'imu':
-        stopActive = startIMU(activeHandle)
+      case 'gyro':
+        stopActive = startGyro(activeHandle)
+        break
+      case 'accel':
+        stopActive = startAccel(activeHandle)
         break
       default:
         stopActive = () => { }

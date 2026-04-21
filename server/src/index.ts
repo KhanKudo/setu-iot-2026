@@ -29,14 +29,21 @@ PUBLIC.selectGame = async (_, game) => {
     await PUBLIC.game(game as any)
 }
 
-CONTROLS.imu = async (_, [x, y, z, pitch, roll, yaw]) => {
-  PUBLIC.imu({
-    x: x ?? 0,
-    y: y ?? 0,
-    z: z ?? 0,
+CONTROLS.gyro = async (_, [pitch, roll, yaw]) => {
+  console.log('gyro:', pitch, roll, yaw)
+  PUBLIC.gyro({
     roll: roll ?? 0,
     pitch: pitch ?? 0,
     yaw: yaw ?? 0,
+  })
+}
+
+CONTROLS.accel = async (_, [x, y, z]) => {
+  console.log('accel:', x, y, z)
+  PUBLIC.accel({
+    x: x ?? 0,
+    y: y ?? 0,
+    z: z ?? 0,
   })
 }
 

@@ -6,20 +6,22 @@ import { ensureData } from "@khankudo/kisdb/core/management"
 import { createSQLiteHandle, destroySQLiteHandle } from "@khankudo/kisdb/db/sqlite"
 import { createVanillaViewer } from "@khankudo/kisdb/viewer/vanilla"
 
-export const gameIds = ['demo', 'pong', 'imu'] as const
+export const gameIds = ['demo', 'pong', 'gyro', 'accel'] as const
 export type GameId = typeof gameIds[number]
 
 export type KisDB = {
   public: {
     matrix: string
     game: GameId
-    imu: {
-      x: number
-      y: number
-      z: number
+    gyro: {
       pitch: number
       roll: number
       yaw: number
+    }
+    accel: {
+      x: number
+      y: number
+      z: number
     }
     connections: number[]
     gamelist: GameId[]
@@ -31,7 +33,8 @@ export type KisDB = {
     left(state?: boolean): void
     right(state?: boolean): void
     middle(state?: boolean): void
-    imu([x, y, z, pitch, roll, yaw]: number[]): void
+    gyro([pitch, roll, yaw]: number[]): void
+    accel([x, y, z]: number[]): void
   }
   private: {
     gamedata: Partial<Record<GameId, DataType | undefined>>
@@ -56,13 +59,15 @@ await ensureData(direct, 'public', {
   matrix: '000000000PPPPPP00P0000P00P0PP0P00P0PP0P00P0000P00PPPPPP000000000',
   game: 'demo',
   gamelist: [],
-  imu: {
-    x: 0,
-    y: 0,
-    z: 0,
+  gyro: {
     pitch: 0,
     roll: 0,
     yaw: 0,
+  },
+  accel: {
+    x: 0,
+    y: 0,
+    z: 0,
   },
   connections: [],
 }, false, false)
