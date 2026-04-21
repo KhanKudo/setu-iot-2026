@@ -3,6 +3,7 @@ import { CONTROLS, gameIds, handle, PUBLIC } from "./db"
 
 import './game'
 import { cooldown } from "./helpers"
+import { createHttpRoutes } from "@khankudo/kisdb/server/http"
 
 const conns: number[] = []
 const wsconf = createWebSocketConfig(handle, undefined, (ok, conn) => {
@@ -13,11 +14,26 @@ const wsconf = createWebSocketConfig(handle, undefined, (ok, conn) => {
 
   PUBLIC.connections(conns)
 })
+const httpconf = createHttpRoutes(handle, undefined, (ok, conn) => {
+  if (ok)
+    conns.push(conn)
+  else
+    conns.splice(conns.indexOf(conn), 1)
+
+  PUBLIC.connections(conns)
+})
 const server = Bun.serve({
-  ...wsconf,
+  routes: { ...httpconf, ...wsconf.routes },
+  websocket: wsconf.websocket,
   hostname: '0.0.0.0',
   fetch(req, server) {
-    return new Response(Bun.file('../../static/' + (URL.parse(req.url)?.pathname?.slice(1) || 'index.html')))
+    let path = URL.parse(req.url)?.pathname?.slice(1) || 'index.html'
+    if (path.includes('..'))
+      return new Response('BAD PATH', { status: 400 })
+
+    if (path && !path.includes('.'))
+      path += '.html'
+    return new Response(Bun.file('../../static/' + path))
   }
 })
 console.log('Ready! ( http://localhost:3000 )')

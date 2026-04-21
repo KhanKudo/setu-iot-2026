@@ -72,19 +72,30 @@ isConnected(ok => {
 })
 
 window.addEventListener('keydown', ({ key }) => {
+  console.log('key:', key)
   switch (key) {
+    case 'w':
+    case 'W':
     case 'ArrowUp':
       PLAYER.up(true)
       break
+    case 's':
+    case 'S':
     case 'ArrowDown':
       PLAYER.down(true)
       break
+    case 'a':
+    case 'A':
     case 'ArrowLeft':
       PLAYER.left(true)
       break
+    case 'd':
+    case 'D':
     case 'ArrowRight':
       PLAYER.right(true)
       break
+    case ' ':
+    case '':
     case 'Enter':
       PLAYER.middle(true)
       break

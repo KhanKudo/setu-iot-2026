@@ -3,118 +3,67 @@
     <head>
         <title>Project IoNoW</title>
         <style>
-            #stick {
-                position: absolute;
-                right: 3rem;
-                bottom: 5rem;
-                width: 3em;
-                height: 3em;
-                font-size: 6.5em;
-                user-select: none;
-            }
-
-            #stick>div {
-                position: absolute;
-                width: 1em;
-                height: 1em;
-                padding: 0;
-                margin: 0;
-                text-align: center;
-                vertical-align: middle;
-            }
-
-            #stick>div#stick-up {
-                left: 1em;
-                top: 0em;
-            }
-            #stick>div#stick-left {
-                left: 0em;
-                top: 1em;
-            }
-            #stick>div#stick-middle {
-                left: 1em;
-                top: 1em;
-            }
-            #stick>div#stick-right {
-                left: 2em;
-                top: 1em;
-            }
-            #stick>div#stick-down {
-                left: 1em;
-                top: 2em;
-            }
-
-            #accounts, #games{
-                display: flex;
-                flex-direction: column;
-                width: fit-content;
-            }
-
-            #accounts button, #games button {
-                transition: all .5s;
-                border-radius: .5em;
-                outline: none;
-                padding: .2em;
-                margin: .25em;
-                cursor: pointer;
-            }
-
-            #accounts .active {
-                background: green;
-            }
-
-            #games .active {
-                background: darkorange;
-            }
-
-            #selectors{
+            body{
                 display: flex;
                 flex-direction: row;
-            }
-
-            #connections {
-                display: flex;
-                flex-direction: row;
-                flex-wrap: wrap;
-                max-width: 10em;
-                width: fit-content;
-                border-radius: .5em;
-                padding: .25em;
-                background-color: #ccc;
-                position: absolute;
-                top: 2em;
-                right: 2em;
-            }
-
-            #connections>div {
-                display: flex;
-                justify-content: center;
+                flex-wrap: nowrap;
+                gap: 1em;
+                padding: .5em;
+                background: #ccc;
+                justify-content: space-around;
                 align-items: center;
-                margin: .15em;
-                width: 2em;
-                height: 2em;
-                border-radius: .5em;
-                background-color: mediumaquamarine;
+            }
+
+            iframe{
+                background: white;
+                width: 100%;
+                height: 90vh;
+                border: 4px solid black;
+                filter: brightness(0.9);
+                /*filter: saturate(0.5) brightness(0.5);*/
+                transition: all .1s;
+                pointer-events: all;
+            }
+
+            iframe.active {
+                border-color: orange;
+                filter: none;
             }
         </style>
     </head>
     <body>
-        <div id="connections"></div>
-        <h1 id="title">Game Title</h1>
-        <canvas id="matrix" width="320" height="320"></canvas>
-        <div id="stick">
-          <div id="stick-up" onpointerdown="PLAYER.up(true)" onpointerup="PLAYER.up(false)">⯅</div>
-          <div id="stick-left" onpointerdown="PLAYER.left(true)" onpointerup="PLAYER.left(false)">⯇</div>
-          <div id="stick-middle" onpointerdown="PLAYER.middle(true)" onpointerup="PLAYER.middle(false)">●</div>
-          <div id="stick-right" onpointerdown="PLAYER.right(true)" onpointerup="PLAYER.right(false)">⯈</div>
-          <div id="stick-down" onpointerdown="PLAYER.down(true)" onpointerup="PLAYER.down(false)">⯆</div>
-        </div>
-        <div id="selectors">
-            <div id="accounts"></div>
-            <div id="games"></div>
-        </div>
-        <footer>
-            <script src="browser.js"></script>
-        </footer>
+        <iframe src="/demo.html?proto=http"></iframe>
+        <iframe src="/demo.html?proto=ws"></iframe>
+        <iframe src="/demo.html?proto=mqtt"></iframe>
+
+        <script>
+          function checkFocus() {
+            if(document.activeElement?.tagName === 'IFRAME' && !document.activeElement.classList.contains('active')) {
+              document.querySelector('iframe.active')?.classList?.remove?.('active')
+              document.activeElement.classList.add('active')
+            }
+          }
+
+          window.setInterval(checkFocus, 50);
+
+          window.onpointerdown = ()=>document.querySelector('iframe.active')?.classList?.remove?.('active')
+
+          window.onkeydown = ({key})=>{
+            switch(key.toUpperCase()){
+              case '1':
+              case 'Q':
+                document.querySelectorAll('iframe')[0].focus()
+                break
+              case '2':
+              case 'W':
+                document.querySelectorAll('iframe')[1].focus()
+                break
+              case '3':
+              case 'E':
+                document.querySelectorAll('iframe')[2].focus()
+                break
+            }
+          }
+        </script>
     </body>
 </html>

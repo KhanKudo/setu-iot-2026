@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Project IoNoW</title>
+        <style>
+            #stick {
+                position: absolute;
+                right: 3rem;
+                bottom: 5rem;
+                width: 3em;
+                height: 3em;
+                font-size: 6.5em;
+                user-select: none;
+            }
+
+            #stick>div {
+                position: absolute;
+                width: 1em;
+                height: 1em;
+                padding: 0;
+                margin: 0;
+                text-align: center;
+                vertical-align: middle;
+            }
+
+            #stick>div#stick-up {
+                left: 1em;
+                top: 0em;
+            }
+            #stick>div#stick-left {
+                left: 0em;
+                top: 1em;
+            }
+            #stick>div#stick-middle {
+                left: 1em;
+                top: 1em;
+            }
+            #stick>div#stick-right {
+                left: 2em;
+                top: 1em;
+            }
+            #stick>div#stick-down {
+                left: 1em;
+                top: 2em;
+            }
+
+            #accounts, #games{
+                display: flex;
+                flex-direction: column;
+                width: fit-content;
+            }
+
+            #accounts button, #games button {
+                transition: all .5s;
+                border-radius: .5em;
+                outline: none;
+                padding: .2em;
+                margin: .25em;
+                cursor: pointer;
+            }
+
+            #accounts .active {
+                background: green;
+            }
+
+            #games .active {
+                background: darkorange;
+            }
+
+            #selectors{
+                display: flex;
+                flex-direction: row;
+            }
+
+            #connections {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                max-width: 10em;
+                width: fit-content;
+                border-radius: .5em;
+                padding: .25em;
+                background-color: #ccc;
+                position: absolute;
+                top: 2em;
+                right: 2em;
+            }
+
+            #connections>div {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: .15em;
+                width: fit-content;
+                min-width: 2em;
+                height: 2em;
+                border-radius: .5em;
+                background-color: mediumaquamarine;
+            }
+
+            #proto{
+                position: absolute;
+                text-align: center;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: fit-content;
+                border: 1px solid darkcyan;
+                background-color: #008b8b44;
+                color: darkcyan;
+                border-radius: 1em;
+                font-size: 2em;
+                padding: 0 .3em;
+                font-family: Arial;
+                text-transform: uppercase;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 id="proto">proto</h1>
+        <div id="connections"></div>
+        <h1 id="title">Game Title</h1>
+        <canvas id="matrix" width="320" height="320"></canvas>
+        <div id="stick">
+          <div id="stick-up" onpointerdown="PLAYER.up(true)" onpointerup="PLAYER.up(false)">⯅</div>
+          <div id="stick-left" onpointerdown="PLAYER.left(true)" onpointerup="PLAYER.left(false)">⯇</div>
+          <div id="stick-middle" onpointerdown="PLAYER.middle(true)" onpointerup="PLAYER.middle(false)">●</div>
+          <div id="stick-right" onpointerdown="PLAYER.right(true)" onpointerup="PLAYER.right(false)">⯈</div>
+          <div id="stick-down" onpointerdown="PLAYER.down(true)" onpointerup="PLAYER.down(false)">⯆</div>
+        </div>
+        <div id="selectors">
+            <div id="accounts"></div>
+            <div id="games"></div>
+        </div>
+        <footer>
+            <script src="browser.js"></script>
+        </footer>
+    </body>
+</html>

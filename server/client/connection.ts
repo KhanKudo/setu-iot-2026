@@ -1,6 +1,8 @@
 import { createWebSocketClient } from "@khankudo/kisdb/client/websocket"
 import { getToken } from "@khankudo/kisdb/core/management"
 import type { KisDB } from "../src/db"
+import { createHttpClient } from "@khankudo/kisdb/client/http"
+import type { KCPHandle, StripFuncsCtx } from "@khankudo/kisdb"
 
 let connListener: ((state: boolean) => void) | null = null
 export function isConnected(listener: (state: boolean) => void) {
@@ -36,7 +38,23 @@ setTimeout(() => {
     selectUser(act)
 }, 100)
 
-export const client = createWebSocketClient<KisDB>(undefined, ctx, ok => connListener?.(ok))
+const proto = new URL(window.location.href).searchParams.get('proto') as Proto ?? 'http'
+document.getElementById('proto')!.innerText = proto
+
+type Proto = 'http' | 'ws' // | 'mqtt'
+
+export const client = proto === 'http' ?
+  createHttpClient<KisDB>(undefined, ctx, ok => connListener?.(ok))
+  : proto === 'ws' ?
+    createWebSocketClient<KisDB>(undefined, ctx, ok => connListener?.(ok))
+    : // as default fallback, use WebSocket
+    null as unknown as KCPHandle<StripFuncsCtx<KisDB>>
+
+if (client === null) {
+  document.getElementById('proto')!.innerText = 'UNSUPPORTED PROTOCOL'
+  document.getElementById('proto')!.style.filter = 'hue-rotate(180deg)'
+  throw new Error('!!! UNSUPPORTED PROTOCOL !!!')
+}
 
 export async function login(username: string, password: string) {
   const lastToken = ctx.token
