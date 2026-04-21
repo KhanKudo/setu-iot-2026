@@ -59,7 +59,7 @@ export type BotData = {
 
 export type BotType = {
   id: number
-  start(data: Omit<BotData, 'controls'>): void
+  start(data: BotData): void
   stop(): void
 }
 
@@ -71,38 +71,32 @@ export function bot(tick: (data: BotData) => void, tickRateMs: number = fps(20),
   return {
     id,
     start(data) {
-      (data as any).controls = {
-        up: false,
-        down: false,
-        left: false,
-        right: false,
-        middle: false,
-      }
       const stop = gameloop(() => {
         if (autorelease) {
           let released = false
-          for (const key in (data as any).controls as Controls) {
-            if (!(data as any).controls[key])
+          for (const _k in data.controls) {
+            const key = _k as keyof Controls
+            if (!data.controls[key])
               continue
             released = true;
-            (data as any).controls[key] = false
-            activeHandle?.[key as keyof Controls]?.(id, (data as any).controls[key])
+            data.controls[key] = false
+            activeHandle?.[key]?.(id, data.controls[key])
           }
           if (released)
-            activeHandle?.input?.(id, (data as any).controls)
+            activeHandle?.input?.(id, data.controls)
         }
-        tick(data as any)
-        for (const key in (data as any).controls as Controls) {
-          activeHandle?.[key as keyof Controls]?.(id, (data as any).controls[key])
+        tick(data)
+        for (const key in data.controls) {
+          activeHandle?.[key as keyof Controls]?.(id, data.controls[key as keyof Controls])
         }
-        activeHandle?.input?.(id, (data as any).controls)
+        activeHandle?.input?.(id, data.controls)
       }, tickRateMs, true, false)
       stopFunc = () => {
         stop()
         delete (activeHandle!.controls as any)[id]
       }
       onActiveStopped.add(stopFunc);
-      (activeHandle!.controls[id] as Controls) = (data as any).controls
+      (activeHandle!.controls[id] as Controls) = data.controls
     },
     stop() {
       if (stopFunc)
@@ -114,7 +108,7 @@ export function bot(tick: (data: BotData) => void, tickRateMs: number = fps(20),
 }
 
 // returns the selected player IDs
-export async function playerSelector(count: number, ...bots: BotType[]): Promise<{ i: number, id: number, color: number }[]> {
+export async function playerSelector(count: number, ...bots: BotType[]): Promise<{ i: number, id: number, color: number, controls: Controls }[]> {
   if (!((bots.length > 0 ? 0 : 1) <= count && count <= 4))
     throw new Error(`Invalid player selection parameters! Count: ${count} players, allowed 1-4`)
 
@@ -244,7 +238,7 @@ export async function playerSelector(count: number, ...bots: BotType[]): Promise
   ]
 
   return new Promise((resolve, reject) => {
-    const selected: { i: number, id: number, color: number }[] = []
+    const selected: { i: number, id: number, color: number, controls: Controls }[] = []
 
     let origInput = handle.input
     const stop = () => {
@@ -299,7 +293,7 @@ export async function playerSelector(count: number, ...bots: BotType[]): Promise
         }
 
         if (chosenPlayerCount > 0)
-          selected.push({ id, i: selected.length, color: playerColors[selected.length]! })
+          selected.push({ id, i: selected.length, color: playerColors[selected.length]!, controls: activeHandle?.controls?.[id]! })
 
         if (selected.length === chosenPlayerCount) {
           handle.input = origInput
@@ -309,13 +303,20 @@ export async function playerSelector(count: number, ...bots: BotType[]): Promise
           for (let i = chosenPlayerCount; i < count; i++) {
             const botId = bots[i - chosenPlayerCount]!.id
 
-            selected.push(<Omit<BotData, 'controls'>>{
+            selected.push(<BotData>{
               i,
               color: playerColors[i]!,
               id: botId,
-              grid: handle.grid
+              grid: handle.grid,
+              controls: {
+                up: false,
+                down: false,
+                left: false,
+                right: false,
+                middle: false,
+              }
             })
-            bots[i - chosenPlayerCount]!.start(selected.at(-1) as Omit<BotData, 'controls'>)
+            bots[i - chosenPlayerCount]!.start(selected.at(-1) as BotData)
           }
 
           resolve(selected)

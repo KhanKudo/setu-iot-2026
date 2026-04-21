@@ -6,7 +6,7 @@ import { ensureData } from "@khankudo/kisdb/core/management"
 import { createSQLiteHandle, destroySQLiteHandle } from "@khankudo/kisdb/db/sqlite"
 import { createVanillaViewer } from "@khankudo/kisdb/viewer/vanilla"
 
-export const gameIds = ['demo', 'pong', 'gyro', 'accel'] as const
+export const gameIds = ['demo', 'pong', 'snake', 'gyro', 'accel'] as const
 export type GameId = typeof gameIds[number]
 
 export type KisDB = {

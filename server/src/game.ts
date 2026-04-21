@@ -3,6 +3,7 @@ import type { DataType } from "@khankudo/kisdb"
 import { renderMatrix } from "./render"
 import startDemo from "./games/demo"
 import startPong from "./games/pong"
+import startSnake from "./games/snake"
 import startAccel from "./games/accel"
 import startGyro from "./games/gyro"
 import { onActiveStopped } from "./helpers"
@@ -16,7 +17,7 @@ export type GameHandle<T extends DataType | undefined = any> = {
   left?: (id: number, state: boolean) => void
   right?: (id: number, state: boolean) => void
   middle?: (id: number, state: boolean) => void
-  memory?: Partial<T>
+  memory?: T
   save: Readonly<() => Promise<void>>
   grid: number[]
 }
@@ -122,8 +123,10 @@ PUBLIC.game.$onnow = async game => {
   }
   activeGame = game
 
-  if (game === null)
+  if (game === null) {
+    activeHandle = null
     return
+  }
 
   const memory = await newGameSave as any
 
@@ -144,6 +147,9 @@ PUBLIC.game.$onnow = async game => {
         break
       case 'pong':
         stopActive = startPong(activeHandle)
+        break
+      case 'snake':
+        stopActive = startSnake(activeHandle)
         break
       case 'gyro':
         stopActive = startGyro(activeHandle)

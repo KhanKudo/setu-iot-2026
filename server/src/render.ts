@@ -87,3 +87,151 @@ export function deltaLine(grid: number[], valueNorm: number, posY: number = 0, c
       draw(grid, color1 * (hx + 1), posX - wx - 1, posY, 1, rx % HIGH)
   }
 }
+
+const _ = false
+const X = true
+
+const gridNumbers: Readonly<boolean[][]> = [
+  [
+    X, X, X, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, X, X, X,
+  ],
+  [
+    _, _, _, X,
+    _, _, X, X,
+    _, X, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+  ],
+  [
+    X, X, X, X,
+    _, _, _, X,
+    _, _, _, X,
+    X, X, X, X,
+    X, _, _, _,
+    X, _, _, _,
+    X, _, _, _,
+    X, X, X, X,
+  ],
+  [
+    X, X, X, X,
+    _, _, _, X,
+    _, _, _, X,
+    X, X, X, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    X, X, X, X,
+  ],
+  [
+    X, _, _, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, X, X, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+  ],
+  [
+    X, X, X, X,
+    X, _, _, _,
+    X, _, _, _,
+    X, X, X, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    X, X, X, X,
+  ],
+  [
+    X, X, X, X,
+    X, _, _, _,
+    X, _, _, _,
+    X, X, X, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, X, X, X,
+  ],
+  [
+    X, X, X, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+  ],
+  [
+    X, X, X, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, X, X, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, X, X, X,
+  ],
+  [
+    X, X, X, X,
+    X, _, _, X,
+    X, _, _, X,
+    X, X, X, X,
+    _, _, _, X,
+    _, _, _, X,
+    _, _, _, X,
+    X, X, X, X,
+  ],
+]
+
+// only positive numbers supported, automatically uses Math.abs
+// posX refers to the bottom-right corner
+export function drawNumber(grid: number[], num: number, color: number, posX: number = 7, fillColor?: number) {
+  do {
+    const digit = Math.abs(num) % 10
+
+    for (let y = 7; y >= 0; y--) {
+      for (let x = 0; x <= 3; x++) {
+        const ni = (7 - y) * 4 + x
+        if (gridNumbers[digit]?.[ni])
+          draw(grid, color, x - 3 + posX, y)
+        else if (fillColor !== undefined)
+          draw(grid, fillColor, x - 3 + posX, y)
+      }
+    }
+
+    posX -= 4
+  } while ((num = Math.floor(num / 10)) !== 0)
+}
+
+export function findPixel(grid: number[], color: number): null | { x: number, y: number } {
+  const index = grid.indexOf(color)
+  if (index === -1)
+    return null
+  return {
+    x: index % 8,
+    y: 7 - Math.floor(index / 8)
+  }
+}
+
+export function getPixel(grid: number[], xy: { x: number, y: number }): number
+export function getPixel(grid: number[], x: number, y: number): number
+export function getPixel(grid: number[], xOrXY: { x: number, y: number } | number, y?: number): number {
+  const x = typeof xOrXY === 'number' ? xOrXY : xOrXY.x
+  y ??= (xOrXY as { y: number }).y
+
+  if (x < 0 || x > 7 || y < 0 || y > 7)
+    return O
+
+  return grid[x + (7 - y) * 8]!
+}
