@@ -1,6 +1,6 @@
 import { type GameHandle } from "../game"
 import { after, bot, fps, gameloop, playerSelector, randi, type BotData } from "../helpers"
-import { O as _, W, draw, R, G1, G3, G, drawNumber, findPixel, Y, getPixel, M } from "../render"
+import { O as _, W, draw, R3, G1, G3, G, drawNumber, findPixel, Y, getPixel, M } from "../render"
 
 type XY = { x: number, y: number }
 
@@ -10,7 +10,7 @@ function eq(a: XY, b: XY): boolean {
   return a.x === b.x && a.y === b.y
 }
 
-const COLOR_APPLE = R
+const COLOR_APPLE = R3
 const COLOR_SNAKE_HEAD = G3
 const COLOR_SNAKE_BODY = G
 const COLOR_SNAKE_TAIL = G1

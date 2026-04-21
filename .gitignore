@@ -1,3 +1,5 @@
 static/browser.js
 *.db
+*.db-journal
 __pycache__
+node_modules
