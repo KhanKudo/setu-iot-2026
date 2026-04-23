@@ -3,6 +3,7 @@ import { getToken } from "@khankudo/kisdb/core/management"
 import type { KisDB } from "../src/db"
 import { createHttpClient } from "@khankudo/kisdb/client/http"
 import type { KCPHandle, StripFuncsCtx } from "@khankudo/kisdb"
+import { createMqttClient } from "@khankudo/kisdb/client/mqtt"
 
 let connListener: ((state: boolean) => void) | null = null
 export function isConnected(listener: (state: boolean) => void) {
@@ -41,14 +42,16 @@ setTimeout(() => {
 const proto = new URL(window.location.href).searchParams.get('proto') as Proto ?? 'http'
 document.getElementById('proto')!.innerText = proto
 
-type Proto = 'http' | 'ws' // | 'mqtt'
+type Proto = 'http' | 'ws' | 'mqtt'
 
 export const client = proto === 'http' ?
   createHttpClient<KisDB>(undefined, ctx, ok => connListener?.(ok))
   : proto === 'ws' ?
     createWebSocketClient<KisDB>(undefined, ctx, ok => connListener?.(ok))
-    : // as default fallback, use WebSocket
-    null as unknown as KCPHandle<StripFuncsCtx<KisDB>>
+    : proto === 'mqtt' ?
+      createMqttClient<KisDB>('wss://broker.emqx.io:8084/mqtt', 'setu/kisdb/', ctx, ok => connListener?.(ok))
+      : // as default fallback, use WebSocket
+      null as unknown as KCPHandle<StripFuncsCtx<KisDB>>
 
 if (client === null) {
   document.getElementById('proto')!.innerText = 'UNSUPPORTED PROTOCOL'

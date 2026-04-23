@@ -1,42 +1,10 @@
 import { createWebSocketConfig } from "@khankudo/kisdb/server/websocket"
+import { createMqttProvider } from "@khankudo/kisdb/server/mqtt"
+import { createHttpRoutes } from "@khankudo/kisdb/server/http"
 import { CONTROLS, gameIds, handle, PUBLIC } from "./db"
+import { cooldown } from "./helpers"
 
 import './game'
-import { cooldown } from "./helpers"
-import { createHttpRoutes } from "@khankudo/kisdb/server/http"
-
-const conns: number[] = []
-const wsconf = createWebSocketConfig(handle, undefined, (ok, conn) => {
-  if (ok)
-    conns.push(conn)
-  else
-    conns.splice(conns.indexOf(conn), 1)
-
-  PUBLIC.connections(conns)
-})
-const httpconf = createHttpRoutes(handle, undefined, (ok, conn) => {
-  if (ok)
-    conns.push(conn)
-  else
-    conns.splice(conns.indexOf(conn), 1)
-
-  PUBLIC.connections(conns)
-})
-const server = Bun.serve({
-  routes: { ...httpconf, ...wsconf.routes },
-  websocket: wsconf.websocket,
-  hostname: '0.0.0.0',
-  fetch(req, server) {
-    let path = URL.parse(req.url)?.pathname?.slice(1) || 'index.html'
-    if (path.includes('..'))
-      return new Response('BAD PATH', { status: 400 })
-
-    if (path && !path.includes('.'))
-      path += '.html'
-    return new Response(Bun.file('../../static/' + path))
-  }
-})
-console.log('Ready! ( http://localhost:3000 )')
 
 PUBLIC.selectGame = async (_, game) => {
   if (
@@ -72,6 +40,47 @@ CONTROLS.accel = async (_, [x, y, z]) => {
     z: z ?? 0,
   })
 }
+
+const conns: number[] = []
+const wsconf = createWebSocketConfig(handle, undefined, (ok, conn) => {
+  if (ok)
+    conns.push(conn)
+  else
+    conns.splice(conns.indexOf(conn), 1)
+
+  PUBLIC.connections(conns)
+})
+const httpconf = createHttpRoutes(handle, undefined, (ok, conn) => {
+  if (ok)
+    conns.push(conn)
+  else
+    conns.splice(conns.indexOf(conn), 1)
+
+  PUBLIC.connections(conns)
+})
+createMqttProvider(handle, 'mqtts://broker.emqx.io:8883', 'setu/kisdb/', (ok, conn) => {
+  if (ok)
+    conns.push(conn)
+  else
+    conns.splice(conns.indexOf(conn), 1)
+
+  PUBLIC.connections(conns)
+})
+const server = Bun.serve({
+  routes: { ...httpconf, ...wsconf.routes },
+  websocket: wsconf.websocket,
+  hostname: '0.0.0.0',
+  fetch(req, server) {
+    let path = URL.parse(req.url)?.pathname?.slice(1) || 'index.html'
+    if (path.includes('..'))
+      return new Response('BAD PATH', { status: 400 })
+
+    if (path && !path.includes('.'))
+      path += '.html'
+    return new Response(Bun.file('../../static/' + path))
+  }
+})
+console.log('Ready! ( http://localhost:3000 )')
 
 process.on('exit', () => {
   server.stop(true)

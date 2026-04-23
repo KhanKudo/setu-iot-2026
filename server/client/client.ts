@@ -72,7 +72,6 @@ isConnected(ok => {
 })
 
 window.addEventListener('keydown', ({ key }) => {
-  console.log('key:', key)
   switch (key) {
     case 'w':
     case 'W':

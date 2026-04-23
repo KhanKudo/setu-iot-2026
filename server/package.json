@@ -14,6 +14,6 @@
   },
   "type": "module",
   "dependencies": {
-    "@khankudo/kisdb": "^0.0.4"
+    "@khankudo/kisdb": "0.1.3"
   }
 }
