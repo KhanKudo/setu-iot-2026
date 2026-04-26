@@ -8,6 +8,9 @@ Assignment from the IoT Standards & Protocols course of 2026 at [SETU Ireland](h
 # __Introduction__
 This project focuses on the low-latency & realtime aspects of modernday IoT infrastructure. For this a custom library [KisDB](https://github.com/KhanKudo/kisdb) was actively developed in parallel and it's commits from v0.0.1 to v0.1.3 are to be treated as a part of this submission. Not only is KisDB such a core element of Project IoNoW, but about 60% of the total  time was spent on it.
   <!--TODO: expand introduction to actually _introduce_ what the project does/accomplishes-->
+  
+# __Demonstration__
+<!--TODO: add link/preview of demonstrational video presentation for the final submission through YouTube-->
 
 # __Project time allocation__
 This information was obtained from __wakatime__, an automated in-IDE time-tracking extension that considers _active-coding_ instead of just 'ide-open-closed' and splits that per-project & language. I've been using it for many years and love the weekly summary emails from which I took the time-data.
@@ -17,9 +20,11 @@ This information was obtained from __wakatime__, an automated in-IDE time-tracki
 # __Project Overview__
 ![Project Graphic](graphic/IoT-Assignment-Graphic.drawio.png)
   <!--TODO: update graphic -->
+  
+<!--TODO: maybe a table-of-contents here if things get too long-->
 
 ## __Challenge__
-  <!--TODO-->
+  <!--TODO: also maybe no longer need this section? Though perhaps could mention that all pretty much all conventional IoT platforms and SaaS-Solutions focus on historic data,having seconds huge display latency of numerous seconds, if not a whole minute. Others that aren't THAT slow, simply try to be ok-fast, as to not degrade user-experience but not trying to support any kind of realtime, interactive applications-->
 
 # __Technologies & Tools__
 
@@ -49,21 +54,34 @@ This information was obtained from __wakatime__, an automated in-IDE time-tracki
 - __Any Laptop__\
   Any laptop or phone can also be used as a client-device through the WebUI. Thanks to the special server-driven-architecture, the WebUI can use arrow-keys, WASD and the Space/Enter keys as equivalent to the SenseHAT joystick. The WebUI also has an on-screen 5-button touch joystick for mobile devices. This Laptop is also where the bun-server can be run, serving the WebUI locally and allowing the Pi to connect.
 
+<!--TODO: somewhere fitting mention flipping the rpi upside-down to switch to next-game, also mention gyro/accel middle-click exception -->
 
 # __Display Modes / Games__
 - __Demo Screen__\
   <!--TODO-->
+  <!--highlight the user-input driven updates (demo) vs gameloop driven (snake*) vs combined (pong)-->
 - __Gyroscope__\
   <!--TODO-->
+  <!--TODO: mention the achieved resolution (in degrees) thanks to fancy line drawer helper-->
 - __Accelerometer__\
   Identical to the gyroscope, except that it's more responsive and has shown to also deliver more reliable data. It is scaled so that the full screen covers a value-range of -1.0 to 1.0. Here when lying flat on a table, the z-axis (blue) will be steady at 1.0 indicating a vertical 1G force (aka gravity) and x-y will be at zero. Moving and/or rotating the device will change these values significantly faster than with the gyro, as this shows the raw, unprocessed IMU readouts.
+  <!--TODO: mention the achieved resolution (in G's? mG's?) thanks to fancy line drawer helper-->
 - __Snake Game__\
   <!--TODO-->
 - __Pong Game__\
   Here 2 Players are required, either two humans, or a human and a bot, or even two bots.
+  <!--note how gameloop-->
+  <!--TODO-->
 
 
+# __Game Loader__
 <!--TODO: explain the builtin, super-simple error-handling of the game-engine. Also take player-selector as a great example, show some errors/warnings from the log when aborted maybe too? -->
+<!--TODO: also mention how gameloader handles saving memory-->
+
+<!--TODO: somewhere fitting, explain the concept of Auth & Identities with KisDB. No need for details, just so that it's clear _how_ the multiplayer works and what the 'anonymous','web-1','web-2','web-3' buttons in the WebUI *actually* do -->
+
+<!--TODO: also note somewhere the security aspect of KisDB Identities too. Note that the WebUI whilst exposing tokens, actually isn't _insecure_ since no write-token is exposed (except for obviously the intended 'writeonly' and 'readonly' tokens) But all admin & server stuff is fully secure. No arbitrary writes or read are allowed outside of public/controls/private e.g. to custom/xyz - forbidden -->
+
 
 # __Important Helper-Functions__
 
@@ -72,10 +90,13 @@ This information was obtained from __wakatime__, an automated in-IDE time-tracki
 
   To improve clarity of use, dynamic arrows on the sides are shown to indicate that a selection can be made in that direction. These disappear at the end of the valid list range, all entirely self-automated.
 <!--TODO: insert player selector graphic with many variants-->
-
+<!--TODO: maybe? mention the drawNumber helper? though far less special & interesting compared to player selector -->
+<!--TODO: do mention definitely the line-drawer-->
 # __Data Structure__
+  <!--TODO: The "Database" type explanation-->
 
 # __API Reference__
+  <!--TODO: the HTTP Rest API-->
 
 # __Compromises from the [Original Proposal](proposal.md)__
 Given the quite large scope of the original proposal, especially when considering the limited project time of mere 6 weeks total and the fact that it's an addon-course alongside the main study and a part-time job, significant cuts had to be made. I am however happy to say, that the most important parts all stayed ... except HTTP/3 :(
