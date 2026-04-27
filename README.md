@@ -6,14 +6,12 @@
 Assignment from the IoT Standards & Protocols course of 2026 at [SETU Ireland](https://setu.ie) part of the Study@Home program at [UAS Technikum Wien](https://technikum-wien.at/en).
 
 # __Introduction__
-This project focuses on the low-latency & realtime aspects of modernday IoT infrastructure. For this a custom library [KisDB](https://github.com/KhanKudo/kisdb) was actively developed in parallel and it's commits from v0.0.1 to v0.1.3 are to be treated as a part of this submission. Not only is KisDB such a core element of Project IoNoW, but about 60% of the total  time was spent on it.
-  <!--TODO: expand introduction to actually _introduce_ what the project does/accomplishes-->
-  
+This project focuses on the realtime aspects of modernday IoT infrastructure. Instead of the usual temperature & humidity graphs, here the _sensors_ are a joystick and a gyroscope, with an 8x8 rgb matrix as the _actuator_. Treating those like any other sensor readings, the goal was to develop an IoT infrastructure fast & efficient enough to make playing, for example, a game of pong on a Raspi SenseHAT possible like it was running locally, except that all of the game logic is an IoT automation running on the server. The Raspi acting as just a simple IoT end-device, treated no differently than a 5-button smart light switch with a screen.
+
+This repository contains all of the _Project IoNoW_ specific code, the general-purpose background-code responsible for handling all the connections, protocols, API routing and DB are all part of a self-made library called [KisDB](https://github.com/KhanKudo/kisdb). It was actively developed in parallel and is a core element of Project IoNoW, which wouldn't have been possible without it. The KisDB commits from March 10th (c6fcdf5) to April 24th (ea5a82f) are to be treated as a part of this submission, considering that about 62% of the total project time was spent there (according to my ___wakatime___ tracker, respectively IoNoW & KisDB: 42h | 68h). The code is split like this, because nothing from KisDB is specific to IoNoW and I absolutely intend on continuing development on it alongside my future projects.
+
 # __Demonstration__
 <!--TODO: add link/preview of demonstrational video presentation for the final submission through YouTube-->
-
-# __Project time allocation__
-This information was obtained from __wakatime__, an automated in-IDE time-tracking extension that considers _active-coding_ instead of just 'ide-open-closed' and splits that per-project & language. I've been using it for many years and love the weekly summary emails from which I took the time-data.
 
 <!-- insert time-graph from time.csv in deifa - use a stacked bar-chart -->
 
@@ -23,25 +21,27 @@ This information was obtained from __wakatime__, an automated in-IDE time-tracki
   
 <!--TODO: maybe a table-of-contents here if things get too long-->
 
+<!--TODO: a 'Getting Started' section, with simple instructions for setting up the code on a raspberry pi (clone from git) and also how to install and run the bun server-->
+
 ## __Challenge__
   <!--TODO: also maybe no longer need this section? Though perhaps could mention that all pretty much all conventional IoT platforms and SaaS-Solutions focus on historic data,having seconds huge display latency of numerous seconds, if not a whole minute. Others that aren't THAT slow, simply try to be ok-fast, as to not degrade user-experience but not trying to support any kind of realtime, interactive applications-->
 
 # __Technologies & Tools__
 
 - [HTTP](https://en.wikipedia.org/wiki/HTTP)
-  Just plain HTTP/1.1 for serving the static WebUI source files. Also through KisDB (see below), provides an HTTP-API for interacting with the server & database. I doesn't use any encryption as it doesn't need it for localhost-deployments and such as in remote-session tests, when actually deployed, it would sit behind a selfhosted reverse proxy such as [HAProxy](https://www.haproxy.com/) in my case. It is much more secure to let dedicated software handle security-critical, open endpoints.
+  is plainly used for serving the static WebUI source files. Also through KisDB (see below), an HTTP REST-API is provided for interacting with the server & database. It doesn't use any encryption as it doesn't need it for localhost. For public deployments it always sits behind a reverse proxy, in my case [HAProxy](https://www.haproxy.com/). It is much more secure to let dedicated software handle specialized security than relying on individual implementations.
 
 - [WebSockets](https://en.wikipedia.org/wiki/WebSocket)
-  Websockets were used through KisDB (see below) to also serve as a method of connecting the clients to the server & database. Unlike Plain HTTP requests, a websocket connection keeps a persistently open bi-directional tcp-socket, so without any further http, both the server and client can in realtime talk to eachother with less overhead, usually being more performant and stable for streaming events both ways.
+  were used through KisDB (see below) to also serve as a method of connecting the clients to the server & database. Unlike Plain HTTP requests, a websocket connection keeps a persistently open bi-directional tcp-socket, so without any further http, both the server and client can in realtime talk to eachother with less overhead, usually being more performant and stable for streaming events both ways.
 
 - [MQTT](https://en.wikipedia.org/wiki/MQTT)
-  MQTT is perhaps the most standard protocol used in almost any IoT application. It was too _standard_ not to use it, even if it wasn't actually needed for the project at all. Though crucially, it ended up being an incredibly good reference for comparison to http/ws, as it works so differently then those do, which makes for an excellent showcase in the project's demonstration.
+  is perhaps the most standard protocol used in almost any IoT application. It was too _standard_ not to use it, even if it wasn't actually needed for the project at all. Though crucially, it ended up being an incredibly good reference for comparison to http/ws, as it works so differently then those do, which makes for an excellent showcase in the project's demonstration. However it's important to mention that MQTT was a late addition and on a significant time-crunch. Due to it's vastly different inner workings compared to http/ws. So sadly the client cannot handle any connection drops or server restarts without itself being restarted (e.g. WebUI tab reload). Although the server is capable of handling client connects and disconnects (via last-will message), though not if the server itself has a connection issue with the broker. This is a pure time-constraint, functionally it can absolutely be done.
 
 - [KisDB](https://github.com/KhanKudo/kisdb)
-  <!--TODO-->
+  is the library which was developed alongside the project and handles all the networking, routing & database aspects of the projects. It is a crucial library that can be considered a _part of_ this project, it was created as a separate entity just because it has no relation to this submission. It's development will be continued afterwards and it will be a key part of many future projects to come. And yes, kisdb has technically existed for many months before this project was ever even planned, but with IoNoW every single file from the original kisdb project is gone and has it has entirely been turned on it's head. Some goals remained, but most have changed/expanded and it is now much much better than it could have ever been before. As such realistically it's not wrong to say that KisDB is a new project that was started with IoNoW.
 
 - [Bun](https://bun.sh)
-  Bun was used as a newer alternative to NodeJS. It has many integrated tools and a significant performance boost compared to plain nodejs. It also natively supports TypeScript and can itself compile a TS module, including all it's imports, into a bundled JavaScript file for the Browser. For this project it was used to build the browser bundle and it's http-router as well as native WebSocket implementation were used through KisDB.
+  was used as a newer alternative to NodeJS. It has many integrated tools and a significant performance boost compared to plain nodejs. It also natively supports TypeScript and can itself compile a TS module, including all it's imports, into a bundled JavaScript file for the Browser. For this project it was used to build the browser bundle and it's http-router as well as native WebSocket implementation were used through KisDB.
 
 # __Hardware__
 
@@ -55,26 +55,31 @@ This information was obtained from __wakatime__, an automated in-IDE time-tracki
   Any laptop or phone can also be used as a client-device through the WebUI. Thanks to the special server-driven-architecture, the WebUI can use arrow-keys, WASD and the Space/Enter keys as equivalent to the SenseHAT joystick. The WebUI also has an on-screen 5-button touch joystick for mobile devices. This Laptop is also where the bun-server can be run, serving the WebUI locally and allowing the Pi to connect.
 
 <!--TODO: somewhere fitting mention flipping the rpi upside-down to switch to next-game, also mention gyro/accel middle-click exception -->
+<!--TODO: add an image or better yet a short gif for each screen-mode -->
 
 # __Display Modes / Games__
-- __Demo Screen__\
-  <!--TODO-->
-  <!--highlight the user-input driven updates (demo) vs gameloop driven (snake*) vs combined (pong)-->
-- __Gyroscope__\
-  <!--TODO-->
-  <!--TODO: mention the achieved resolution (in degrees) thanks to fancy line drawer helper-->
-- __Accelerometer__\
+- __Demo Game__ [#](server/src/games/demo.ts)\
+  This demo screen very neatly shows off the RGB color of the SenseHAT matrix and also immediately allows the user to experience the low input delay in a game-like environment. It supports any number of unique players, for any new, previously unseen player, it randomly generates a position & color for them. This _blob_ can then only ever be controlled by that player. Using the middle-click, the player can change their color using bitshifts. Once at black, white is also given as an option and then the cycle continues through red, green and blue. Once a player is added, they can only be removed through the API by an admin (or the demo write-only token). Since there are really only 4 user-accounts, at most 4 blobs can realistically exist thus that is fine as a demo. It also utilizes the persistent-memory of the _"Game Engine"_ and saves all player colors and locations. So even across different sessions, client disconnects or server restarts, everything stays exactly how it was.
+- __Joystick__ [#](server/src/games/stick.ts)\
+  The joystick demo showcases the raw inputs that the server gets in realtime. Note that unlike the usual single-event button-input in IoT systems, I wanted it to be usable like an actual button. This means full state tracking, so an event for pressing and also releasing. Although the API was also designed to handle single-event buttons, internally assuming a 50ms hold duration, as that's about the standard for a human tap. This screen nicely serves to demonstrate that holding feature and also easily let the user feel any potential delay, though more so it shows how quickly everything reacts to even the slightest taps or wildest spams. In the top-left corner a toggling indicator light was added to show screen updates when e.g. holding down a button on your keyboard in the WebUI and showing the live updates registering each held keystroke is usually repeated by the keyboard or Operating System at 20-30Hz.
+- __Gyroscope__ [#](server/src/games/gyro.ts)\
+  Identical to the gyroscope, except that it's more responsive and has shown to also deliver more reliable data. It is scaled so that the full screen covers a value-range of -180.0 to +180.0 degrees. Rotating the Raspi will change these values in realtime. Thanks to the advanced delta-line drawing utility, it can achieve a displayed resolution of 7.5° instead of mere 45° without it. This also makes it feel much more responsive as smaller movements also change the display output. The sensor-polling on polling on the Raspi is implemented as an asynchio loop, for it handles WebSocket stuff for 10ms then reads & sends the sensor data. In practice this results in about 5-10 updates per second, as that is all the sensehat library can do because of the significant internal signal processing overhead related to the gyroscope. It is quite known that the gyro-data of the SenseHAT is quite poor, so don't expect sensible results. The accelerometer display (see below) is a far better demo, this was mostly added to showcase why the gyro didn't get used. When a different screen-mode is selected, gyroscope data is no longer updated as it's not needed and more importantly causes very significant lagging inside the Pi's main event loop, vastly impacting the user experience.
+- __Accelerometer__ [#](server/src/games/accel.ts)\
   Identical to the gyroscope, except that it's more responsive and has shown to also deliver more reliable data. It is scaled so that the full screen covers a value-range of -1.0 to 1.0. Here when lying flat on a table, the z-axis (blue) will be steady at 1.0 indicating a vertical 1G force (aka gravity) and x-y will be at zero. Moving and/or rotating the device will change these values significantly faster than with the gyro, as this shows the raw, unprocessed IMU readouts.
-  <!--TODO: mention the achieved resolution (in G's? mG's?) thanks to fancy line drawer helper-->
-- __Snake Game__\
-  <!--TODO-->
-- __Pong Game__\
-  Here 2 Players are required, either two humans, or a human and a bot, or even two bots.
-  <!--note how gameloop-->
-  <!--TODO-->
+  Thanks to the advanced delta-line drawing utility, it can achieve a displayed resolution of ~0.042G instead of mere 0.250G without it. That's a 6x improvement and makes everything feel way more lively! The sensor-polling on polling on the Raspi is implemented as an asynchio loop, for it handles WebSocket stuff for 10ms then reads & sends the sensor data. In practice this results in about 30 updates per second. When a different screen-mode is selected, this is reduced to about 5 updates per second to keep the Raspi very responsive and even that is more than needed.
+- __Snake Game__ [#](server/src/games/snake.ts)\
+  The classic snake game, can be played by the human user or a simple bot. It keeps track of your achieved score and shows you the result at the end of your round. Snake also utilizes persistent memory to keep track of the player's individual, personal best score (including bots) as well as a human-only global highscore. It even has cool arcade-style flashing _"animations"_ when a player beats their PB or the highscore. Though these can be skipped (reduced to 1/2 a second) by pressing the middle-button. The bot here was primarily made so that for demonstrations, the display could be left running and would show a game of snake, rather a snake going straight into the wall again and again. With that in mind, the bot automatically presses the middle-button for the scores to fast-forward them, to improve the demo. For humans, snake is run at 2fps as that is a good balance. To make idle displays more interesting however, the bot plays at 6fps.
+- __Pong Game__ [#](server/src/games/pong.ts)\
+  Here 2 Players are required, either two humans, or a human and a bot, or even two bots. Here the bot was made to actually enable you, the single-user to play pong as a game, as it's hardly any fun if your opponent doesn't ever move at all. The two-bot support is a nice bonus, so that it can be left running as a demo. Unlike snake, pong has no score-tracking. Snake demonstrates that possibility already and to maximize time efficiency, pong was left without it. An interesting effect in pong was the gameloop. So pong has a gametick of 250ms to not make it stressful but also keep it entertaining. this is where the players movements whilst holding down a button are updated. However testing revealed that this made the game feel unresponsive and laggy. So a 250ms movement cooldown was instead implemented, thanks to the cooldown helper-function, keeping the gameloop hold-moving but adding an on-click immediate update on the button-press. With the cooldown in place, the player would appropriately not be moved on the following gametick and spam-clicking is also prevented this way.
 
+## __Switching Display Modes__ [#](server/src/index.ts#L25-42)
+There are two main ways of switching the display modes:
 
-# __Game Loader__
+1. __From the WebUI__, any display-mode can manually be selected. A list of all modes is always displayed, which let's you pick simply click on any of them. This always works, except when the 'anonymous' Identity is selected, as that is just a spectator and doesn't have the permissions to interact with anything. So clicking will have no effect unless one of the 'web-X' users is selected.
+2. __From the Raspi__ you can actually just turn it upside-down and the display-modes will be cycled in their defined order at an interval of 750ms. The rotation-sensor updates 5 times per second, you can actually also just quite quickly turn it upside-down and immediately back up-right to only go to the next gamemode. Holding it upside-down will keep cycling. An exception to this rule though does exist, actually two. Both the `accel` and `gyro` displays are exempt from this, so that you can freely play with the Pi's rotation without skipping to the next screen. For those two, you can press the middle-click button on the joystick to cycle to the next mode.
+<!--TODO: maybe change this so that actually, to demonstrate user-accounts better, only pressing middle-click on the Raspi itself will trigger a cycle for gyro/accel, any other user will not. For this maybe then best to move that switching code out of gyro.ts & accel.ts into index.ts -->
+
+# __Game Loader__ [#](server/src/game.ts)
 <!--TODO: explain the builtin, super-simple error-handling of the game-engine. Also take player-selector as a great example, show some errors/warnings from the log when aborted maybe too? -->
 <!--TODO: also mention how gameloader handles saving memory-->
 
@@ -85,27 +90,135 @@ This information was obtained from __wakatime__, an automated in-IDE time-tracki
 
 # __Important Helper-Functions__
 
-- __Player Selector__\
+- __Player Selector__ [#](server/src/helpers.ts#L113-333)\
   This function can be used inside of a game. It allows for selecting between 0 and 4 human players, with the required remainder auto-initiated with game-provided bots. The game must specify a required total player count (bots or humans or mixed) and may provide any number of bots. From there, the Helperfunction takes care of all display functions and user-inputs. It calculates the minimum and maximum number or human players required to satisfy total player count, based on provided bot-count. Then it allow the player to scroll left-right using the joystick and select the number of human players they wish to have (using middle-button of joystick). If more than one human player was selected, a 1 through 4 ordered screen will show up, allowing players to middle-click to register themselves as the shown player number (1-4). If 0 or 1 human players are selected, this is skipped as the choice is clear.
 
   To improve clarity of use, dynamic arrows on the sides are shown to indicate that a selection can be made in that direction. These disappear at the end of the valid list range, all entirely self-automated.
 <!--TODO: insert player selector graphic with many variants-->
+
+- __Delta-Line Drawer__ [#](server/src/render.ts#L60-89)\
+  As described in the [original proposal](proposal.md#L37), displaying numeric data with a line can be made much more accurate by also dimming the LEDs instead of just On/Off states. This idea was expanded further by adding a lineWidth parameter. This way the width at the line's tip can be dynamically controlled to add further display precision.
 <!--TODO: maybe? mention the drawNumber helper? though far less special & interesting compared to player selector -->
-<!--TODO: do mention definitely the line-drawer-->
+
+# __Display Matrix encoding__
+The 8x8 rgb matrix display offers 8-bit (0..255) control for each of the red, green and blue channels separately, so in total 24-bits per pixel * 64 = 192 bytes. However this is waaay more than would ever be needed. Old games used to use just 1-bit per color so 3-bits total (BW-RGB-CMY). The popular NES had a master palette of just 54 colors, of which only at most 25 could be used at once. So when I decided to define 2-bits per color so 6-bits total, that gave me an effective palette of 64 colors which is more than the NES, so plenty enough for me. I also wanted to store the information as a plain ascii string without any control characters, one character per pixel. This would make things efficient whilst also making it somewhat human-readable from e.g. the mqtt message flow because one character directly corresponds to one pixel, whereas any more or less would be far more difficult to visually see.
+
+One pixel in the application code is represented by the javascript-supported octal format: 0o123, though limited to 2-bits (0..3) per digit. For the matrix-string, this then got encoded into a raw 6-bit value: `0b00rrggbb`, to this value then, decimal (base10) `48` was added to make it start at the ascii character '0'. the 8x8=64 pixel colors are then arranged into a string of characters starting from the top-left corner (0) and ending at bottom-right (63). Here is an example value of the splashscreen, a creeper face inspired by the [Raspberry Pi SenseHAT Guide](https://projects.raspberrypi.org/en/projects/getting-started-with-the-sense-hat): Green #2 is wanted (so 66% brightness), meaning `0b00001000` + 48 = ascii '8' -> `8888888888888888800880088008800888800888880000888800008888088088` which when arranged forms:
+```
+88888888     >>>>>     8 8 8 8 8 8 8 8     >>>>>     8 8 8 8 8 8 8 8
+88888888     >>>>>     8 8 8 8 8 8 8 8     >>>>>     8 8 8 8 8 8 8 8
+80088008     >>>>>     8 0 0 8 8 0 0 8     >>>>>     8 - - 8 8 - - 8
+80088008     >>>>>     8 0 0 8 8 0 0 8     >>>>>     8 - - 8 8 - - 8
+88800888     >>>>>     8 8 8 0 0 8 8 8     >>>>>     8 8 8 - - 8 8 8
+88000088     >>>>>     8 8 0 0 0 0 8 8     >>>>>     8 8 - - - - 8 8
+88000088     >>>>>     8 8 0 0 0 0 8 8     >>>>>     8 8 - - - - 8 8
+88088088     >>>>>     8 8 0 8 8 0 8 8     >>>>>     8 8 - 8 8 - 8 8
+```
+
 # __Data Structure__
-  <!--TODO: The "Database" type explanation-->
+## General [#](server/src/db.ts#L9-42)
+```TypeScript
+type KisDB = {
+  public: { // publicly read-only data, exec (selectGame) only permitted for authenticated users
+    matrix: string // the custom-encoded ascii string containing 8x8 RGB display-data
+    game: GameId //string oneof: demo | stick | pong | snake | gyro | accel
+    gyro: { // last updated gyroscope data
+      pitch: number
+      roll: number
+      yaw: number
+    }
+    accel: { // last updated accelerometer data
+      x: number
+      y: number
+      z: number
+    }
+    connections: number[] // live list of connIDs for each currently connected client
+    gamelist: GameId[] // ['demo', 'stick', 'pong', 'snake', 'gyro', 'accel']
+    selectGame(game: string): void // triggered from the WebUI game-select buttons
+  }
+  controls: { // endpoints for all Raspi & WebUI inputs
+    up(state?: boolean): void
+    down(state?: boolean): void
+    left(state?: boolean): void
+    right(state?: boolean): void
+    middle(state?: boolean): void
+    gyro([pitch, roll, yaw]: number[]): void // used by the Pi for gyroscope data, as it has no public write-access
+    accel([x, y, z]: number[]): void // used by the Pi for accelerometer data, as it has no public write-access
+  }
+  private: {
+    gamedata: Partial<Record<GameId, DataType | undefined>> // persistent per-game memory of game-specific type
+  }
+}
+```
+
+## Snake Game [#](server/src/games/snake.ts#L18-21)
+```TypeScript
+type Save = {
+  highscore: number,
+  pbs: Record<UserID, number>, // UserID = number
+}
+```
+## Demo Game [#](server/src/games/demo.ts#L5-10)
+```TypeScript
+type Save = {
+  players: Record<UserID, { // UserID = number
+    position: { x: number, y: number }
+    color: number
+  }>
+}
+```
 
 # __API Reference__
-  <!--TODO: the HTTP Rest API-->
+KisDB's [http-server](https://github.com/KhanKudo/kisdb/blob/main/server/http.ts) implementation is made to be used like a standard REST API. It supports GET, POST, DELETE and allows authentication via the "Authorization: Bearer xyz" Header or by placing the token as a query item "?token=xyz" in the request URL. This makes it incredibly accessible to basically every network-capable client written in any programming language.
+
+For example, a basic GET request for all public data can be made straight from the [browser](http://localhost:3000/kisdb/public) or with curl:
+
+```bash
+curl http://localhost:3000/kisdb/public
+```
+
+This is possible because kisdb treats the url as `http://{domain}:{port}/{basepath}/{key}` with domain and port not relevant for kisdb and basepath in this case left at default of `/kisdb` the `key` is the only relevant part. This is the same key you would use in the javascript object, except that instead of a dot-separator, slash is used: `PublicDB.gyro.roll -> http://localhost:3000/kisdb/public/gyro/roll`, requesting this URL in the [browser](http://localhost:3000/kisdb/public/gyro/roll)/curl returns just the gyro's last roll value, exactly as you'd expect from a REST API.
+
+The data can also be changed with a POST request from curl, and for this the `writeonly` token (for the demo) can be used to e.g. set the current active game to ___stick___:
+
+```bash
+curl -H "Authorization: Bearer writeonly"
+http://localhost:3000/kisdb/public/game -d '"stick"'
+```
+Note that the "" are required here as json is expected, you can try making the request without double quotes, and you'll see it return an error message with statuscode 400 (=Bad Request).
+
+KPI functions such as /public/selectGame or /controls/up are too triggered using a GET request if no argument is needed, otherwise providing the argument as a POST value. Multiple argument can be achieved by using sending an object or array and destructuring it in the function implementation. To the client, there is no difference between a function and a value, except that functions cannot be subscribed to (sidenote: they actually _can_ be, but updates only occur, when that key gets overwritten by the server to become a real value instead of a kpi function, until then it's treated as empty/non-existent).
+
+With that in mind, you can manually trigger a key-presses (best tested in the 'stick' display-mode) by making the following curl request:
+
+```bash
+curl -H "Authorization: Bearer readonly"
+http://localhost:3000/kisdb/controls/up -d true
+```
+Note the missing quotes, this is because a boolean value is expected, which in JSON is raw and unquoted. As for bash, it accepts parameters without quotes, but here -d 'true' would also work just fine since those are bash-quotes that don't get sent. Also making this a GET request (remove '-d true'), would trigger the selected button for 50ms instead of treating it like a press-down and expecting a separate release event.
+
+Second Note: this request is possible because of the very basi implementation of the demo users, so the 'readonly' token actually corresponds to a specific user-account, as such it is treated as a player of it's own. So it indirectly gains the same access as the web-1/web-2/web-3 demo users. The 'writeonly' token too can be used, it also has a different, unique user identity.
+
+Data can also be deleted using the DELETE http method. For example deleting the game-list, which will cause problems in the WebUI, as the DB-Type defines it to always exist, but simply restart the server afterwards and it'll auto-recreate the missing gamelist entry.
+
+```bash
+curl -H "Authorization: Bearer writeonly"
+http://localhost:3000/kisdb/public/gamelist -X DELETE
+```
+
+KisDB also requires a key to be specified, so `http://localhost:3000/kisdb` will not return an object with everything but instead get parsed as `key=''` which doesn't exist, but regardless unless admin, you don't have by default any permissions, so the response will be a statuscode of 403 (Forbidden) with an `Access Denied` message.
+
+# __Auth & Permissions__ [#](server/src/db.ts#L46-57)
+<!--TODO-->
 
 # __Compromises from the [Original Proposal](proposal.md)__
-Given the quite large scope of the original proposal, especially when considering the limited project time of mere 6 weeks total and the fact that it's an addon-course alongside the main study and a part-time job, significant cuts had to be made. I am however happy to say, that the most important parts all stayed ... except HTTP/3 :(
+Given the quite large scope of the original proposal, especially when considering the limited project time of mere 6 weeks total and the fact that it's an addon-course alongside the main study and with my part-time job, significant cuts had to be made. I am however happy to say, that the most important parts all stayed ... except HTTP/3 :(
 
 - [HTTP/3](https://en.wikipedia.org/wiki/HTTP/3) / [QUIC](https://en.wikipedia.org/wiki/QUIC)\
-  Not that much, but some time was spent trying to successfully compile the [NanoMQ Client](https://github.com/nanomq/nanomq) with special QUIC flags (-DNNG_ENABLE_QUIC=ON + more), but despite the effort and successfully compiling it, I was unable to establish a successful MQTT over QUIC connection with the locally selfhosted [EMQX Broker](https://hub.docker.com/r/emqx/emqx) instance. Whilst I am certain that would have been possible with a bit more time, I deemed that QUIC was just a _behind-the-scenes_ niche feature and didn't _add_ anything to the project. Yes it's very cool, yes I really wanted to use it, yes I am upset about this, but no, I don't regret the choice. I don't know what problems I'd have run into. It might have just worked, or maybe blew up the whole project scope. Project IoNoW's core and all of KisDB is written in TypeScript, running on [Bun](https://bun.sh). MQTT over QUIC was only supported in C/C++, python, go and Erlang. I wasn't going to write a server in C++, Erlang I never touched, Python I used only when needed and go I just got into liking, but it would have taken waayyy too much time. So using QUIC in this project wasn't just about getting nanomq connected, a whole lot more would have needed to be tailor-made for it. Even after all of that, I'd need something to actually show it off! As in, it's cool to send an mqtt message over quic, but if that's __all__ I managed to do, _use_ mqtt... well that wouldn't have been great to say the least.
+  Not that much, but some time was spent trying to successfully compile the [NanoMQ Client](https://github.com/nanomq/nanomq) with special QUIC flags (-DNNG_ENABLE_QUIC=ON + more), but despite the effort and successfully compiling it, I was unable to establish a successful MQTT over QUIC connection with the locally selfhosted [EMQX Broker](https://hub.docker.com/r/emqx/emqx) instance. Whilst I am certain that it would have been possible with a bit more time, I deemed that QUIC was just a _behind-the-scenes_ niche feature and didn't _add_ anything to the project. Yes it's very cool, yes I really wanted to use it, yes I am upset about this, but no, I don't regret the choice. I don't know what problems I'd have run into. It might have just worked, or maybe blew up the whole project scope. Project IoNoW's core and all of KisDB is written in TypeScript, running on [Bun](https://bun.sh). MQTT over QUIC was only supported in C/C++, python, go and Erlang. I wasn't going to write a server in C++, Erlang I never touched, Python I used only when needed and go I just got into liking, but it would have taken waayyy too much time. So using QUIC in this project wasn't just about getting nanomq connected, a whole lot more would have needed to be tailor-made for it. Even after all of that, I'd need something to actually show it off! As in, it's cool to send an mqtt message over quic, but if that's __all__ I managed to do, _use_ mqtt... well that wouldn't have been great to say the least.
 
 - __Database__\
-  I planned to use PostgreSQL and have a nice ZFS pool for it, everything clean, but again, I understood that it really wasn't worth it. It was just a little _behind-the-scenes_ footnote that would have taken a decent amount of time but wouldn't deliver any new feature, nothing new to show, nothing to learn or discuss. As such, SQLite was continued to be used, which also means that this project is much easier to run yourself, not having to host anything yourself or pay others to.
+  I planned to use PostgreSQL and have a nice ZFS pool for it, everything clean, but again, I understood that it really wasn't worth it. It was just a little _behind-the-scenes_ footnote that would have taken a decent amount of time but wouldn't deliver any new feature, nothing new to show, nothing to learn or talk about. As such, SQLite was continued to be used, which also means that this project is much easier to run yourself, not having to host anything or pay others to.
 
 - __Soil Moisture__\
   After a discussion with the lector, we came to the conclusion that what I had done already was very plenty enough to demonstrate everything. I had real, proper, persistent data-storage, it wasn't necessary to go out of my way and add some, _any_ historic sensor data 'just cuz', when I could spend the time on more meaningful things. Not _every_ IoT Projects need a temperature and humidity graph ;) (though notably instead, realtime gyro & accel sensors were nicely displayed, which wasn't originally planned, so that's a bonus)
@@ -123,9 +236,9 @@ Given the quite large scope of the original proposal, especially when considerin
 # A note on AI
 This project utilizes very little AI, I personally simply work better without it; I've tried using Agents, everything takes longer, is much more annoying to make and ends up being far worse, hard to understand/extend and very unreliable.
 
-What AI's great for, is researching very specific/niche, 'hard-to-google' topics & problems. I still love to simply google for stuff (actually Brave/DDG) and look through Documentation/StackOverflow/Reddit results but sometimes nothing comes up. Some tools or problems are too new, since AI noone really posts solutions or questions on forums anymore. So AI as a modern-day search engine is a valid usecase for me. When it comes to code, the same way people would traditionally have used StackOverflow or Google Search (the good old one), I treat AI answers just like any StackOverflow response: Cautiously optimistic.
+What AIs are great for, is researching very specific/niche, 'hard-to-google' topics & problems. I still love to simply google for stuff (actually Brave/DDG) and look through Documentation/StackOverflow/Reddit results but sometimes nothing comes up. Some tools or problems are too new, since AI noone really posts solutions or questions on forums anymore. So AI as a modern-day search engine is a valid usecase for me. When it comes to code, the same way people would traditionally have used StackOverflow or Google Search (the good old one), I treat AI answers just like any StackOverflow response: Cautiously optimistic.
 
-With that having been said, another great use for AI is _translation_, it really has revolutionized that. So much so, that the KisDB interface files *for python* were fully AI-generated, and then naturally adjusted by me, since Gemini Pro couldn't manage to get everything done I wanted/needed and also had some silly bugs. I've hardly ever needed to use python, even then only on a very minimal basis. With this project's scope and limited time, I could have only scrapped together something awful myself taking a bunch of wasted time, or asked AI to give me a library which I already hand-made in TypeScript, but simplified and in python. This worked wonderfully. AI was also used in some of KisDB's *TypeScript Type-Definitions* (*only* typedefs!) since KCP has a couple very complex types, truly hard to figure out on your own. But other than those two instances, *everything* else was *purely* hand-written. No other code at all was generated.
+With that having been said, another great use for AI is _translation_, it really has revolutionized that. So much so, that the KisDB interface files ***for python*** were fully AI-generated, and then naturally adjusted by me, since Gemini Pro couldn't manage to get everything done I wanted/needed and also had some silly bugs. I've hardly ever needed to use python, even then only on a very minimal basis. With this project's scope and limited time, I could have only scrapped together something awful myself taking a bunch of wasted time, or asked AI to give me a library which I already hand-made in TypeScript, but simplified and in python. This worked wonderfully. AI was also used in some of KisDB's **TypeScript Type-Definitions** (***only*** typedefs!) since KCP has a couple very complex types, truly hard to figure out on your own. But other than those two instances, **everything** else was **purely** hand-written. No other code at all was generated.
 
 Regarding writing, I strongly believe that the work we present as our own for others to read and interact with it, shall expeptionlessly truly be our own work. If I can't be bothered to write it, why should anyone else be bothered to read it.
 
