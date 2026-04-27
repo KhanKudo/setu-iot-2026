@@ -111,18 +111,28 @@ window.addEventListener('keydown', ({ key }) => {
 
 window.addEventListener('keyup', ({ key }) => {
   switch (key) {
+    case 'w':
+    case 'W':
     case 'ArrowUp':
       PLAYER.up(false)
       break
+    case 's':
+    case 'S':
     case 'ArrowDown':
       PLAYER.down(false)
       break
+    case 'a':
+    case 'A':
     case 'ArrowLeft':
       PLAYER.left(false)
       break
+    case 'd':
+    case 'D':
     case 'ArrowRight':
       PLAYER.right(false)
       break
+    case ' ':
+    case '':
     case 'Enter':
       PLAYER.middle(false)
       break

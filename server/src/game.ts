@@ -2,10 +2,11 @@ import { CONTROLS, PRIVATE, PUBLIC, type KisDB } from "./db"
 import type { DataType } from "@khankudo/kisdb"
 import { renderMatrix } from "./render"
 import startDemo from "./games/demo"
+import startStick from "./games/stick"
 import startPong from "./games/pong"
 import startSnake from "./games/snake"
-import startAccel from "./games/accel"
 import startGyro from "./games/gyro"
+import startAccel from "./games/accel"
 import { onActiveStopped, resetBotCounter } from "./helpers"
 
 export type GameHandle<T extends DataType | undefined = any> = {
@@ -145,6 +146,9 @@ PUBLIC.game.$onnow = async game => {
     switch (game) {
       case 'demo':
         stopActive = startDemo(activeHandle)
+        break
+      case 'stick':
+        stopActive = startStick(activeHandle)
         break
       case 'pong':
         stopActive = startPong(activeHandle)
