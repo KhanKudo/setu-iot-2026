@@ -8,23 +8,86 @@ Assignment from the IoT Standards & Protocols course of 2026 at [SETU Ireland](h
 # __Introduction__
 This project focuses on the realtime aspects of modernday IoT infrastructure. Instead of the usual temperature & humidity graphs, here the _sensors_ are a joystick and a gyroscope, with an 8x8 rgb matrix as the _actuator_. Treating those like any other sensor readings, the goal was to develop an IoT infrastructure fast & efficient enough to make playing, for example, a game of pong on a Raspi SenseHAT possible like it was running locally, except that all of the game logic is an IoT automation running on the server. The Raspi acting as just a simple IoT end-device, treated no differently than a 5-button smart light switch with a screen.
 
-This repository contains all of the _Project IoNoW_ specific code, the general-purpose background-code responsible for handling all the connections, protocols, API routing and DB are all part of a self-made library called [KisDB](https://github.com/KhanKudo/kisdb). It was actively developed in parallel and is a core element of Project IoNoW, which wouldn't have been possible without it. The KisDB commits from March 10th (c6fcdf5) to April 24th (ea5a82f) are to be treated as a part of this submission, considering that about 62% of the total project time was spent there (according to my ___wakatime___ tracker, respectively IoNoW & KisDB: 42h | 68h). The code is split like this, because nothing from KisDB is specific to IoNoW and I absolutely intend on continuing development on it alongside my future projects.
+Most IoT platforms focus on data collection and visualisation. Some others also prioritize responsiveness _to some degree_ in the sense of buttons or lights that _quickly enough_ as to not harm the user experience much. This tends to be around 1 to 3 seconds. My goal is actual realtime, bidirectional data integration; so more like 10 to 100ms.
+
+This repository contains all of the _Project IoNoW_ specific code (sensors, buttons, games, raspi, python, etc.), the general-purpose background-code responsible for handling all the connections, protocols, API routing and DB are all part of a self-made library called [KisDB](https://github.com/KhanKudo/kisdb). It was actively developed in parallel and is a core element of Project IoNoW, which wouldn't have been possible without it. The KisDB commits from March 10th (c6fcdf5) to April 24th (ea5a82f) are to be treated as a part of this submission, considering that about 59% of the total project time was spent there (according to my ___wakatime___ tracker, respectively IoNoW & KisDB: 48h | 68h). The code is split like this, because nothing from KisDB is specific to IoNoW and I absolutely intend on continuing it's development alongside my future projects.
 
 # __Demonstration__
+TODO
 <!--TODO: add link/preview of demonstrational video presentation for the final submission through YouTube-->
 
-<!-- insert time-graph from time.csv in deifa - use a stacked bar-chart -->
-
 # __Project Overview__
+TODO
+
 ![Project Graphic](graphic/IoT-Assignment-Graphic.drawio.png)
   <!--TODO: update graphic -->
-  
-<!--TODO: maybe a table-of-contents here if things get too long-->
 
-<!--TODO: a 'Getting Started' section, with simple instructions for setting up the code on a raspberry pi (clone from git) and also how to install and run the bun server-->
+# __Getting Started__
+A quick guide on how to run everything from this project yourself.
+## __Raspberry Pi SenseHAT Client__
+Firstly download Raspberry Pi OS (Lite on the Pi 3B was used here) from the [downloads page](https://www.raspberrypi.com/software/operating-systems/) and follow official instructions for the installation. In this project, the default linux user on the Pi was called 'raspi', if your's is different, you will have to adjust the provided systemd [service file](sensehat/project-ionow.service) `setu-iot-2026/sensehat/project-ionow.service`. After booting into the OS, we can start by installing the required packages.
+```bash
+# do initial one-time apt-setup for the Pi
+sudo apt-get update
+sudo apt-get upgrade
+# the reboot is optional, but certainly doesn't hurt
+sudo reboot
+```
+```bash
+# install the required packages
+sudo apt-get install git python3 sense-hat python3-websockets
+# or your user's $HOME directory here
+cd /home/raspi
+git clone https://github.com/KhanKudo/setu-iot-2026.git
+cd setu-iot-2026
+# make sure to adjust the paths in the service file to fit your setup
+sudo cp sensehat/project-ionow.service /etc/systemd/system
+# load the newly added service
+sudo systemctl daemon-reload
+# Start now and configure autostart on boot for the just added service
+sudo systemctl enable --now project-ionow
+```
+And that's it for the Pi, the SenseHAT display should now light up with a creeper face until the Python program manages to connect to the IoNoW server (which isn't running yet).
+## __Bun IoNoW Server__
+In testing, to see the delay between Pi & Server and also to ease quick development, IoNoW was always run on my laptop. It can however be run on the Pi itself too, for this you must only change the appropriate server IP at the top of `/home/raspi/setu-iot-2026/sensehat/main.py`
+### __Raspberry Pi__
+```bash
+# install bun
+curl -fsSL https://bun.sh/install | bash
+# reload $PATH
+source ~/.bashrc
+# enter the project's server directory
+cd /home/raspi/setu-iot-2026/server
+# install dependencies (aka. kisdb)
+bun install
+# start the local server on port 3000
+bun run start
+```
+### __Linux Laptop__
+```bash
+# install bun
+curl -fsSL https://bun.sh/install | bash
+# clone the project repository
+git clone https://github.com/KhanKudo/setu-iot-2026.git
+# enter the project's server directory
+cd setu-iot-2026/server
+# install dependencies (aka. kisdb)
+bun install
+# start the local server on port 3000
+bun run start
+# click on the link in the terminal to open the WebUI in your browser
+```
+### __Windows Laptop__
+```powershell
+powershell -c "irm bun.sh/install.ps1 | iex"
 
-## __Challenge__
-  <!--TODO: also maybe no longer need this section? Though perhaps could mention that all pretty much all conventional IoT platforms and SaaS-Solutions focus on historic data,having seconds huge display latency of numerous seconds, if not a whole minute. Others that aren't THAT slow, simply try to be ok-fast, as to not degrade user-experience but not trying to support any kind of realtime, interactive applications-->
+git clone https://github.com/KhanKudo/setu-iot-2026.git
+
+cd .\setu-iot-2026\server
+
+bun install
+bun run start
+```
 
 # __Technologies & Tools__
 
@@ -54,7 +117,6 @@ This repository contains all of the _Project IoNoW_ specific code, the general-p
 - __Any Laptop__\
   Any laptop or phone can also be used as a client-device through the WebUI. Thanks to the special server-driven-architecture, the WebUI can use arrow-keys, WASD and the Space/Enter keys as equivalent to the SenseHAT joystick. The WebUI also has an on-screen 5-button touch joystick for mobile devices. This Laptop is also where the bun-server can be run, serving the WebUI locally and allowing the Pi to connect.
 
-<!--TODO: somewhere fitting mention flipping the rpi upside-down to switch to next-game, also mention gyro/accel middle-click exception -->
 <!--TODO: add an image or better yet a short gif for each screen-mode -->
 
 # __Display Modes / Games__
@@ -76,17 +138,17 @@ This repository contains all of the _Project IoNoW_ specific code, the general-p
 There are two main ways of switching the display modes:
 
 1. __From the WebUI__, any display-mode can manually be selected. A list of all modes is always displayed, which let's you pick simply click on any of them. This always works, except when the 'anonymous' Identity is selected, as that is just a spectator and doesn't have the permissions to interact with anything. So clicking will have no effect unless one of the 'web-X' users is selected.
-2. __From the Raspi__ you can actually just turn it upside-down and the display-modes will be cycled in their defined order at an interval of 750ms. The rotation-sensor updates 5 times per second, you can actually also just quite quickly turn it upside-down and immediately back up-right to only go to the next gamemode. Holding it upside-down will keep cycling. An exception to this rule though does exist, actually two. Both the `accel` and `gyro` displays are exempt from this, so that you can freely play with the Pi's rotation without skipping to the next screen. For those two, you can press the middle-click button on the joystick to cycle to the next mode.
-<!--TODO: maybe change this so that actually, to demonstrate user-accounts better, only pressing middle-click on the Raspi itself will trigger a cycle for gyro/accel, any other user will not. For this maybe then best to move that switching code out of gyro.ts & accel.ts into index.ts -->
+2. __From the Raspi__ you can actually just turn it upside-down and the display-modes will be cycled in their defined order at an interval of 750ms. The Pi's rotation is updated about 5 times per second, so you can actually quite quickly turn it upside-down and immediately back up-right to only go to the next gamemode. Keeping it upside-down will keep cycling at 1.5Hz. An exception to this rule are `accel` and `gyro` displays. Since they rely on the Pi's movement/orientation in order to fully experience them, the Pi needs to rotate without skipping to the next screen. For those two cases, the middle-click button on the Pi's joystick can be pressed instead. This also illustrates the custom permissions that are possible, as only the Pi's joystick middle-click can cycle to the next game, if anyone else tries to, nothing will happen. This behavior is linked to the raspi identity and has nothing to do with client-code.
 
-# __Game Loader__ [#](server/src/game.ts)
-<!--TODO: explain the builtin, super-simple error-handling of the game-engine. Also take player-selector as a great example, show some errors/warnings from the log when aborted maybe too? -->
-<!--TODO: also mention how gameloader handles saving memory-->
-
-<!--TODO: somewhere fitting, explain the concept of Auth & Identities with KisDB. No need for details, just so that it's clear _how_ the multiplayer works and what the 'anonymous','web-1','web-2','web-3' buttons in the WebUI *actually* do -->
-
-<!--TODO: also note somewhere the security aspect of KisDB Identities too. Note that the WebUI whilst exposing tokens, actually isn't _insecure_ since no write-token is exposed (except for obviously the intended 'writeonly' and 'readonly' tokens) But all admin & server stuff is fully secure. No arbitrary writes or read are allowed outside of public/controls/private e.g. to custom/xyz - forbidden -->
-
+# __Game Loader Utility__ [#](server/src/game.ts)
+This is a helper file that handles everything around starting/stopping and switching the currently active display-mode (aka. game).
+## __Features__
+- __Life-Cycles__ of all screens/display-modes/games are handled by it. Loading, starting, running and stopping games, along with all the related bots, input hooks and pending promises (awaitables) is all handled by it.
+- __Input Hooks__ are provided to each game on start, so that the game can easily define listener functions for specific button click or the whole state of the joystick. If the game uses an gameloop and doesn't need dynamic input hooks, a live-updating object-reference to the current state of inputs is provided to the game as well.
+- __Persistent Memory__ is a must-have for scoreboards (snake) or player positions (demo). It provides the game with an arbitrary property-reference which it can locally read from and write to with any JavaScript supported data, after all it's a normal JS Variable. It's contents are automatically saved by the game-utility and loaded when the game is started. A `save` function is also provided to manually save important achievements, although the auto-save on game-stop and server-stop is very reliable.
+- __Game Loops__ are crucial for games that run at a fixed internal such as snake. The player has no influence over how fast the snake moves, only in which direction. The `gameloop` helper functions enables games to do exactly that, register for one (or many) time-fixed (e.g. X fps) loops that the game-utility will automatically keep track of and handle when the game stopping when the game is closed. It also can optionally automatically trigger a screen-render based on the default-matrix-grid at the end of each gameloop iteration, though by default disabled.
+- __Subscriptions__ to any KisDB path/value can also be made and automatically started/stopped by the game-helper when the game is stopped.
+- __Async Events__ are needed if a game ever has to for example read a value from KisDB once, not subscribe to it, wait for the response and continue execution after. The `after` helper function here does exactly that, it accepts a JavaScript Promise and a callback function. Should the game be stopped before the promise could be settled, it will automatically be rejected and continued game execution is prevented.
 
 # __Important Helper-Functions__
 
@@ -98,7 +160,8 @@ There are two main ways of switching the display modes:
 
 - __Delta-Line Drawer__ [#](server/src/render.ts#L60-89)\
   As described in the [original proposal](proposal.md#L37), displaying numeric data with a line can be made much more accurate by also dimming the LEDs instead of just On/Off states. This idea was expanded further by adding a lineWidth parameter. This way the width at the line's tip can be dynamically controlled to add further display precision.
-<!--TODO: maybe? mention the drawNumber helper? though far less special & interesting compared to player selector -->
+- __Number Drawer__ [#](server/src/render.ts#L91-215)\
+  This helper function can render positive integer numbers on the 8x8 matrix display. It allow for customizing of the character-color as well background-color (default is transparent). It's vertical position cannot be changed, since the digits are 8-pixels high, but the horizontal offset can freely be adjusted. The set coordinate refers to the bottom-right starting pixel. Numbers spannings multiple digits are automatically handled correctly, expanding to the left. This is used in the player selector as well as the snake scoreboard.
 
 # __Display Matrix encoding__
 The 8x8 rgb matrix display offers 8-bit (0..255) control for each of the red, green and blue channels separately, so in total 24-bits per pixel * 64 = 192 bytes. However this is waaay more than would ever be needed. Old games used to use just 1-bit per color so 3-bits total (BW-RGB-CMY). The popular NES had a master palette of just 54 colors, of which only at most 25 could be used at once. So when I decided to define 2-bits per color so 6-bits total, that gave me an effective palette of 64 colors which is more than the NES, so plenty enough for me. I also wanted to store the information as a plain ascii string without any control characters, one character per pixel. This would make things efficient whilst also making it somewhat human-readable from e.g. the mqtt message flow because one character directly corresponds to one pixel, whereas any more or less would be far more difficult to visually see.
@@ -168,6 +231,34 @@ type Save = {
 }
 ```
 
+# __Auth & Permissions__ [#](server/src/db.ts#L46-57)
+There are 9 relevant user-accounts in total throughout this project:
+1. Admin: __superadmin__\
+  Used by the backend to instantiate all the other users and configure all relevant access permissions.
+  This is a special user that always exists inside KisDB, when successfully authenticated, all access checks are bypassed, every request is granted. Equivalent to root on linux.
+1. Server: __server__\
+  Used by the backend server to gain proper permissions within the database. KisDB is structured in such a way, that the server too has to authenticate just like any other client, although it uses a direct-link connection inside JavaScript rather than http/ws/mqtt. This is equivalent to running services on a linux server with dedicated users instead of having everything run as root. The direct-link is also what allows it to _define_ KPI-functions to be called by other users. This is only possible with write-access and a direct link.
+1. Users: __web-1__ | __web-2__ | __web-3__\
+  These are made available in the WebUI so that anyone playing around in e.g. the demo-game can control different blobs. It is also crucial for allowing "multiplayer" experiences across different WebUI clients at the sime time. Anyone can choose any one of these users, they all have the same permissions.
+1. Raspberry Pi: __raspi__\
+  Equivalent to the web-users, except that only the Raspi has the access token, no option to use it is provided in the WebUI.
+1. Spectator: __anonymous__\
+  A special user always present in KisDB that get's assigned to all connections by default until they successfully authenticate themselves.
+1. API Demo: __write__ & __read__\
+  These two were created with their respective tokens of 'readonly' and 'writeonly'. They serve for demonstrational purposes allowing anyone to play around with raw api-calls with unrestricted write or read-access.
+
+| User | public | controls | private | manage users & access |
+| ---- | ------ | -------- | ------- | ------------ |
+| superadmin | r w x | r w x | r w x | yes |
+| server | r w x | r w x | r w x | no |
+| web-1 | r - x | - - x | - - - | no |
+| web-2 | r - x | - - x | - - - | no |
+| web-3 | r - x | - - x | - - - | no |
+| raspi | r - x | - - x | - - - | no |
+| anonymous | r - - | - - - | - - - | no |
+| demo-read | r - x | r - x | r - - | no |
+| demo-write | r w x | - w x | - w - | no |
+
 # __API Reference__
 KisDB's [http-server](https://github.com/KhanKudo/kisdb/blob/main/server/http.ts) implementation is made to be used like a standard REST API. It supports GET, POST, DELETE and allows authentication via the "Authorization: Bearer xyz" Header or by placing the token as a query item "?token=xyz" in the request URL. This makes it incredibly accessible to basically every network-capable client written in any programming language.
 
@@ -208,9 +299,6 @@ http://localhost:3000/kisdb/public/gamelist -X DELETE
 
 KisDB also requires a key to be specified, so `http://localhost:3000/kisdb` will not return an object with everything but instead get parsed as `key=''` which doesn't exist, but regardless unless admin, you don't have by default any permissions, so the response will be a statuscode of 403 (Forbidden) with an `Access Denied` message.
 
-# __Auth & Permissions__ [#](server/src/db.ts#L46-57)
-<!--TODO-->
-
 # __Compromises from the [Original Proposal](proposal.md)__
 Given the quite large scope of the original proposal, especially when considering the limited project time of mere 6 weeks total and the fact that it's an addon-course alongside the main study and with my part-time job, significant cuts had to be made. I am however happy to say, that the most important parts all stayed ... except HTTP/3 :(
 
@@ -234,7 +322,7 @@ Given the quite large scope of the original proposal, especially when considerin
 
 
 # A note on AI
-This project utilizes very little AI, I personally simply work better without it; I've tried using Agents, everything takes longer, is much more annoying to make and ends up being far worse, hard to understand/extend and very unreliable.
+This project utilizes very little AI, I personally simply work better without it. I've tried using Agents, everything takes longer, is much more annoying to make and ends up being far worse, harder to understand or extend and generally unreliable.
 
 What AIs are great for, is researching very specific/niche, 'hard-to-google' topics & problems. I still love to simply google for stuff (actually Brave/DDG) and look through Documentation/StackOverflow/Reddit results but sometimes nothing comes up. Some tools or problems are too new, since AI noone really posts solutions or questions on forums anymore. So AI as a modern-day search engine is a valid usecase for me. When it comes to code, the same way people would traditionally have used StackOverflow or Google Search (the good old one), I treat AI answers just like any StackOverflow response: Cautiously optimistic.
 

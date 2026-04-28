@@ -7,6 +7,11 @@ from proxy import KcpProxyViewer
 from sense_hat import SenseHat
 from websocket import KcpWebSocketClient
 
+# change depending on your server's (laptop's) IP or use an mDNS address
+IONOW_SERVER = "192.168.0.20:3000"
+# uncomment below when hosting on the Pi itself
+# IONOW_SERVER = "localhost:3000"
+
 sense = SenseHat()
 # sense.set_rotation(90)
 
@@ -72,7 +77,7 @@ async def main():
         selected = game
 
     client = KcpWebSocketClient(
-        "ws://192.168.0.20:3000/kisdb-ws",
+        f"ws://{IONOW_SERVER}/kisdb-ws",
         "94de889064a147c3a960d289356858dc6a384b2a90c04f078a47bd87ddef7137",
         connstate,
     )

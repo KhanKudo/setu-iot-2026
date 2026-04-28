@@ -1,4 +1,4 @@
-import { CONTROLS, PRIVATE, PUBLIC, type KisDB } from "./db"
+import { CONTROLS, gameIds, PRIVATE, PUBLIC, RASPI, type KisDB } from "./db"
 import type { DataType } from "@khankudo/kisdb"
 import { renderMatrix } from "./render"
 import startDemo from "./games/demo"
@@ -54,6 +54,12 @@ function trigger(id: number, btns: Controls, key: keyof Controls) {
   activeHandle?.input?.(id, btns)
 }
 
+export function cycleNextGame() {
+  // if game not in list, defaults to zero-index
+  const nextIndex = activeGame === null ? 0 : gameIds.indexOf(activeGame) + 1
+  return PUBLIC.game(gameIds[nextIndex % gameIds.length]!)
+}
+
 CONTROLS.up = async ({ identity }, state) => {
   const btns = getControls(identity)
   btns.up = state ?? true
@@ -95,6 +101,9 @@ CONTROLS.left = async ({ identity }, state) => {
     timeout(id, 0, null)
 }
 CONTROLS.middle = async ({ identity }, state) => {
+  if ((activeGame === 'gyro' || activeGame === 'accel') && identity === RASPI && state)
+    return cycleNextGame()
+
   const btns = getControls(identity)
   btns.middle = state ?? true
   trigger(identity, btns, 'middle')
@@ -105,7 +114,7 @@ CONTROLS.middle = async ({ identity }, state) => {
     timeout(id, 0, null)
 }
 
-let activeGame: KisDB['public']['game'] | null = null
+export let activeGame: KisDB['public']['game'] | null = null
 export let activeHandle: GameHandle | null = null
 let stopActive: () => void = () => { }
 

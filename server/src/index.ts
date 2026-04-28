@@ -5,6 +5,7 @@ import { CONTROLS, gameIds, handle, PUBLIC } from "./db"
 import { cooldown } from "./helpers"
 
 import './game'
+import { activeGame, cycleNextGame } from "./game"
 
 PUBLIC.selectGame = async (_, game) => {
   if (
@@ -23,16 +24,13 @@ CONTROLS.gyro = async (_, [pitch, roll, yaw]) => {
 }
 
 CONTROLS.accel = async (_, [x, y, z]) => {
-  if (z! < -0.8) {
-    if (cooldown('z-select', 750)) {
-      Promise.all([PUBLIC.game, PUBLIC.gamelist]).then(([game, gamelist]) => {
-        if (game === 'gyro' || game === 'accel')
-          return // ignore for these two, there the middle button can be used instead
-
-        const nextIndex = gamelist.indexOf(game) + 1 // if game not in list, defaults to zero-index
-        PUBLIC.game(gamelist[nextIndex % gamelist.length]!)
-      })
-    }
+  if (
+    (z ?? 0) < -0.8
+    && activeGame !== 'gyro'
+    && activeGame !== 'accel'
+    && cooldown('z-select', 750)
+  ) {
+    cycleNextGame()
   }
   PUBLIC.accel({
     x: x ?? 0,
