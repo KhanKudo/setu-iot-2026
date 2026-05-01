@@ -121,44 +121,44 @@ bun run start
 # __Display Modes / Games__
 - __Demo Game__ [#](server/src/games/demo.ts)
 
-  <!--<img src="docs/demo.jpg" width="256">-->
-  <img src="docs/demo-dash.jpg" width="256">
-  <img src="docs/demo.gif" width="256">
+  <!--<img src="docs/demo.jpg" height="256">-->
+  <img src="docs/demo-dash.jpg" height="256">
+  <img src="docs/demo.gif" height="256">
 
   This demo screen very neatly shows off the RGB color of the SenseHAT matrix and also immediately allows the user to experience the low input delay in a game-like environment. It supports any number of unique players, for any new, previously unseen player, it randomly generates a position & color for them. This _blob_ can then only ever be controlled by that player. Using the middle-click, the player can change their color using bitshifts. Once at black, white is also given as an option and then the cycle continues through red, green and blue. Once a player is added, they can only be removed through the API by an admin (or the demo write-only token). Since there are really only 4 user-accounts, at most 4 blobs can realistically exist thus that is fine as a demo. It also utilizes the persistent-memory of the _"Game Engine"_ and saves all player colors and locations. So even across different sessions, client disconnects or server restarts, everything stays exactly how it was.
 - __Joystick__ [#](server/src/games/stick.ts)
 
-  <img src="docs/stick.jpg" width="256">
-  <img src="docs/stick.gif" width="256">
+  <img src="docs/stick.jpg" height="256">
+  <img src="docs/stick.gif" height="256">
 
   The joystick demo showcases the raw inputs that the server gets in realtime. Note that unlike the usual single-event button-input in IoT systems, I wanted it to be usable like an actual button. This means full state tracking, so an event for pressing and also releasing. Although the API was also designed to handle single-event buttons, internally assuming a 50ms hold duration, as that's about the standard for a human tap. This screen nicely serves to demonstrate that holding feature and also easily let the user feel any potential delay, though more so it shows how quickly everything reacts to even the slightest taps or wildest spams. In the top-left corner a toggling indicator light was added to show screen updates when e.g. holding down a button on your keyboard in the WebUI and showing the live updates registering each held keystroke is usually repeated by the keyboard or Operating System at 20-30Hz.
 - __Gyroscope__ [#](server/src/games/gyro.ts)
 
-  <img src="docs/gyro.gif" width="256">
+  <img src="docs/gyro.gif" height="256">
 
   Identical to the gyroscope, except that it's more responsive and has shown to also deliver more reliable data. It is scaled so that the full screen covers a value-range of -180.0 to +180.0 degrees. Rotating the Raspi will change these values in realtime. Thanks to the advanced delta-line drawing utility, it can achieve a displayed resolution of 7.5° instead of mere 45° without it. This also makes it feel much more responsive as smaller movements also change the display output. The sensor-polling on polling on the Raspi is implemented as an asynchio loop, for it handles WebSocket stuff for 10ms then reads & sends the sensor data. In practice this results in about 5-10 updates per second, as that is all the sensehat library can do because of the significant internal signal processing overhead related to the gyroscope. It is quite known that the gyro-data of the SenseHAT is quite poor, so don't expect sensible results. The accelerometer display (see below) is a far better demo, this was mostly added to showcase why the gyro didn't get used. When a different screen-mode is selected, gyroscope data is no longer updated as it's not needed and more importantly causes very significant lagging inside the Pi's main event loop, vastly impacting the user experience.
 - __Accelerometer__ [#](server/src/games/accel.ts)
 
-  <img src="docs/accel.gif" width="256">
+  <img src="docs/accel.gif" height="256">
 
   Identical to the gyroscope, except that it's more responsive and has shown to also deliver more reliable data. It is scaled so that the full screen covers a value-range of -1.0 to 1.0. Here when lying flat on a table, the z-axis (blue) will be steady at 1.0 indicating a vertical 1G force (aka gravity) and x-y will be at zero. Moving and/or rotating the device will change these values significantly faster than with the gyro, as this shows the raw, unprocessed IMU readouts.
   Thanks to the advanced delta-line drawing utility, it can achieve a displayed resolution of ~0.042G instead of mere 0.250G without it. That's a 6x improvement and makes everything feel way more lively! The sensor-polling on polling on the Raspi is implemented as an asynchio loop, for it handles WebSocket stuff for 10ms then reads & sends the sensor data. In practice this results in about 30 updates per second. When a different screen-mode is selected, this is reduced to about 5 updates per second to keep the Raspi very responsive and even that is more than needed.
 - __Snake Game__ [#](server/src/games/snake.ts)
 
-  <img src="docs/snake.jpg" width="256">
-  <img src="docs/snake.gif" width="256">
+  <img src="docs/snake.jpg" height="256">
+  <img src="docs/snake.gif" height="256">
 
   The classic snake game, can be played by the human user or a simple bot. It keeps track of your achieved score and shows you the result at the end of your round. Snake also utilizes persistent memory to keep track of the player's individual, personal best score (including bots) as well as a human-only global highscore. It even has cool arcade-style flashing _"animations"_ when a player beats their PB or the highscore. Though these can be skipped (reduced to 1/2 a second) by pressing the middle-button. The bot here was primarily made so that for demonstrations, the display could be left running and would show a game of snake, rather a snake going straight into the wall again and again. With that in mind, the bot automatically presses the middle-button for the scores to fast-forward them, to improve the demo. For humans, snake is run at 2fps as that is a good balance. To make idle displays more interesting however, the bot plays at 6fps.
 
-  <img src="docs/snake-scoreboards.gif" alt="Scoreboards GIF" width="256">
-  <img src="docs/snake-pb.gif" alt="New Personal Best GIF" width="256">
-  <!--<img src="docs/snake-score.jpg" width="256">
-  <img src="docs/snake-pb.jpg" width="256">
-  <img src="docs/snake-highscore.jpg" width="256">-->
+  <img src="docs/snake-scoreboards.gif" alt="Scoreboards GIF" height="256">
+  <img src="docs/snake-pb.gif" alt="New Personal Best GIF" height="256">
+  <!--<img src="docs/snake-score.jpg" height="256">
+  <img src="docs/snake-pb.jpg" height="256">
+  <img src="docs/snake-highscore.jpg" height="256">-->
 - __Pong Game__ [#](server/src/games/pong.ts)
 
-  <img src="docs/pong.jpg" width="256">
-  <img src="docs/pong.gif" width="256">
+  <img src="docs/pong.jpg" height="256">
+  <img src="docs/pong.gif" height="256">
 
   Here 2 Players are required, either two humans, or a human and a bot, or even two bots. Here the bot was made to actually enable you, the single-user to play pong as a game, as it's hardly any fun if your opponent doesn't ever move at all. The two-bot support is a nice bonus, so that it can be left running as a demo. Unlike snake, pong has no score-tracking. Snake demonstrates that possibility already and to maximize time efficiency, pong was left without it. An interesting effect in pong was the gameloop. So pong has a gametick of 250ms to not make it stressful but also keep it entertaining. this is where the players movements whilst holding down a button are updated. However testing revealed that this made the game feel unresponsive and laggy. So a 250ms movement cooldown was instead implemented, thanks to the cooldown helper-function, keeping the gameloop hold-moving but adding an on-click immediate update on the button-press. With the cooldown in place, the player would appropriately not be moved on the following gametick and spam-clicking is also prevented this way.
     
@@ -168,6 +168,8 @@ There are two main ways of switching the display modes:
 
 1. __From the WebUI__, any display-mode can manually be selected. A list of all modes is always displayed, which let's you pick simply click on any of them. This always works, except when the 'anonymous' Identity is selected, as that is just a spectator and doesn't have the permissions to interact with anything. So clicking will have no effect unless one of the 'web-X' users is selected.
 2. __From the Raspi__ you can actually just turn it upside-down and the display-modes will be cycled in their defined order at an interval of 750ms. The Pi's rotation is updated about 5 times per second, so you can actually quite quickly turn it upside-down and immediately back up-right to only go to the next gamemode. Keeping it upside-down will keep cycling at 1.5Hz. An exception to this rule are `accel` and `gyro` displays. Since they rely on the Pi's movement/orientation in order to fully experience them, the Pi needs to rotate without skipping to the next screen. For those two cases, the middle-click button on the Pi's joystick can be pressed instead. This also illustrates the custom permissions that are possible, as only the Pi's joystick middle-click can cycle to the next game, if anyone else tries to, nothing will happen. This behavior is linked to the raspi identity and has nothing to do with client-code.
+
+  <img src="docs/flip.gif">
 
 # __Note on Data Capture__
 All the recordings were made directly by me using the Canon eos R100 on a tripod with ffmpeg cropping. I found a fantastic christmas deal on it + had a company discount voucher so got it for an incredible price. I am very happy with the shots I was able to achieve, despite my complete lack of media knowledge. I'm glad to have finally gotten to use it for something more than taking weird pictures of random objects. Also worth noting, albeit quite obvious; the GIFs for the Gyro & Accel showcase were screencaptured on my laptop from the WebUI as it wasn't really possible to capture the physical rgb matrix while also spinning the Pi around in all sorts of ways to get that data! :D
@@ -189,9 +191,10 @@ This is a helper file that handles everything around starting/stopping and switc
 
   To improve clarity of use, dynamic arrows on the sides are shown to indicate that a selection can be made in that direction. These disappear at the end of the valid list range, all entirely self-automated.
 
-  <img src="docs/player-selector-0.jpg" width="256">
-  <img src="docs/player-selector-1.jpg" width="256">
-  <img src="docs/player-selector-2.jpg" width="256">
+  <!--<img src="docs/player-selector-0.jpg" height="256">
+  <img src="docs/player-selector-1.jpg" height="256">
+  <img src="docs/player-selector-2.jpg" height="256">-->
+  <img src="docs/player-selector.gif" height="256">
 
 - __Delta-Line Drawer__ [#](server/src/render.ts#L60-89)\
   As described in the [original proposal](proposal.md#L37), displaying numeric data with a line can be made much more accurate by also dimming the LEDs instead of just On/Off states. This idea was expanded further by adding a lineWidth parameter. This way the width at the line's tip can be dynamically controlled to add further display precision.
@@ -213,7 +216,8 @@ One pixel in the application code is represented by the javascript-supported oct
 88088088     >>>>>     8 8 0 8 8 0 8 8     >>>>>     8 8 - 8 8 - 8 8
 ```
 
-<img src="docs/creeper.jpg" width="256">
+<img src="docs/creeper.jpg" height="256">
+<img src="docs/creeper.png" height="256">
 
 
 # __Data Structure__
