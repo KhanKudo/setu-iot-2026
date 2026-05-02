@@ -167,6 +167,11 @@ bun run start
 There are two main ways of switching the display modes:
 
 1. __From the WebUI__, any display-mode can manually be selected. A list of all modes is always displayed, which let's you pick simply click on any of them. This always works, except when the 'anonymous' Identity is selected, as that is just a spectator and doesn't have the permissions to interact with anything. So clicking will have no effect unless one of the 'web-X' users is selected.
+
+<div align="center">
+  <img src="docs/webui.png" height="540">
+</div>
+
 2. __From the Raspi__ you can actually just turn it upside-down and the display-modes will be cycled in their defined order at an interval of 750ms. The Pi's rotation is updated about 5 times per second, so you can actually quite quickly turn it upside-down and immediately back up-right to only go to the next gamemode. Keeping it upside-down will keep cycling at 1.5Hz. An exception to this rule are `accel` and `gyro` displays. Since they rely on the Pi's movement/orientation in order to fully experience them, the Pi needs to rotate without skipping to the next screen. For those two cases, the middle-click button on the Pi's joystick can be pressed instead. This also illustrates the custom permissions that are possible, as only the Pi's joystick middle-click can cycle to the next game, if anyone else tries to, nothing will happen. This behavior is linked to the raspi identity and has nothing to do with client-code.
 
 <div align="center">
@@ -218,8 +223,8 @@ One pixel in the application code is represented by the javascript-supported oct
 88088088     >>>>>     8 8 0 8 8 0 8 8     >>>>>     8 8 - 8 8 - 8 8
 ```
 
-<img src="docs/creeper.jpg" height="256">
-<img src="docs/creeper.png" height="256">
+<img src="docs/creeper.jpg" width="256">
+<img src="docs/creeper.png" width="256">
 
 
 # __Data Structure__
