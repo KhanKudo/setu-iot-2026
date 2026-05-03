@@ -225,8 +225,8 @@ One pixel in the application code is represented by the javascript-supported oct
 88088088     >>>>>     8 8 0 8 8 0 8 8     >>>>>     8 8 - 8 8 - 8 8
 ```
 
-    <img src="docs/creeper.jpg" width="256">
-    <img src="docs/creeper.png" width="256">
+  <img src="docs/creeper.jpg" width="256">
+  <img src="docs/creeper.png" width="256">
 
 
 # __Data Structure__
