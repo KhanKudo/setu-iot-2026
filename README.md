@@ -12,14 +12,16 @@ Most IoT platforms focus on data collection and visualisation. Some others also 
 
 This repository contains all of the _Project IoNoW_ specific code (sensors, buttons, games, raspi, python, etc.), the general-purpose background-code responsible for handling all the connections, protocols, API routing and DB are all part of a self-made library called [KisDB](https://github.com/KhanKudo/kisdb). It was actively developed in parallel and is a core element of Project IoNoW, which wouldn't have been possible without it. The KisDB commits from March 10th (c6fcdf5) to April 24th (ea5a82f) are to be treated as a part of this submission, considering that about 56% of the total project time was spent there (according to my ___wakatime___ tracker, respectively IoNoW & KisDB: 53h | 68h). The code is split like this, because nothing from KisDB is specific to IoNoW and I absolutely intend on continuing it's development alongside my future projects.
 
-Whilst this project exclusively processes everything on the backend, in a real deployment a sensible mixture of firmware & backend processing would be used. The actual goal is to make this dynamic interaction much easier to implement and adapt. But showing that it can work in this extreme-case is a great example.
+Whilst this project exclusively processes everything on the backend. In a real deployment, a sensible combination of on-device- and backend-processing would be used. KisDB's goal is to make the dynamic interaction between the two much easier to define, implement, adapt and maintain. However showing that it can work in an extreme-case scenario, makes for a great example.
 
-# __Demonstration__
-TODO
-<!--TODO: add link/preview of demonstrational video presentation for the final submission through YouTube-->
-
-# __Project Overview__
+# __Project Overview__: [YouTube Submission](https://youtu.be/k8fjejrlu-U)
 ![Project Graphic](docs/final-submission.drawio.png)
+
+# __Web UI__
+With realtime parallel, fully independent HTTP/SSE, WebSocket and MQTT connections.
+Loaded entirely separately as individual iframe elements (localhost:3000/demo) with respective query flag *?proto=http|ws|mqtt*.
+
+![Project Graphic](docs/webui.png)
 
 # __Getting Started__
 A quick guide on how to run everything from this project yourself.
@@ -169,7 +171,7 @@ There are two main ways of switching the display modes:
 1. __From the WebUI__, any display-mode can manually be selected. A list of all modes is always displayed, which let's you pick simply click on any of them. This always works, except when the 'anonymous' Identity is selected, as that is just a spectator and doesn't have the permissions to interact with anything. So clicking will have no effect unless one of the 'web-X' users is selected.
 
 <div align="center">
-  <img src="docs/webui.png" height="540">
+  <img src="docs/select-game.gif">
 </div>
 
 2. __From the Raspi__ you can actually just turn it upside-down and the display-modes will be cycled in their defined order at an interval of 750ms. The Pi's rotation is updated about 5 times per second, so you can actually quite quickly turn it upside-down and immediately back up-right to only go to the next gamemode. Keeping it upside-down will keep cycling at 1.5Hz. An exception to this rule are `accel` and `gyro` displays. Since they rely on the Pi's movement/orientation in order to fully experience them, the Pi needs to rotate without skipping to the next screen. For those two cases, the middle-click button on the Pi's joystick can be pressed instead. This also illustrates the custom permissions that are possible, as only the Pi's joystick middle-click can cycle to the next game, if anyone else tries to, nothing will happen. This behavior is linked to the raspi identity and has nothing to do with client-code.
@@ -178,8 +180,8 @@ There are two main ways of switching the display modes:
   <img src="docs/flip.gif">
 </div>
 
-# __Note on Data Capture__
-All the recordings were made directly by me using the Canon eos R100 on a tripod with ffmpeg cropping. I found a fantastic christmas deal on it + had a company discount voucher so got it for an incredible price. I am very happy with the shots I was able to achieve, despite my complete lack of media knowledge. I'm glad to have finally gotten to use it for something more than taking weird pictures of random objects. Also worth noting, albeit quite obvious; the GIFs for the Gyro & Accel showcase were screencaptured on my laptop from the WebUI as it wasn't really possible to capture the physical rgb matrix while also spinning the Pi around in all sorts of ways to get that data! :D
+# Note on Data Capture
+All the recordings were made directly by me using the Canon eos R100 on a tripod, cropped using ffmpeg. I found a fantastic christmas deal on it + had a company discount voucher so it was an incredible price. I am very happy with the shots I was able to achieve, despite my complete lack of media knowledge. I'm also glad to have finally gotten to use this gear for something more than odd photos of random objects. The demonstrational video was edited using OpenShot and the audio was recorded using Audacity. In the [YouTube Submission](https://youtu.be/k8fjejrlu-U) you will see a pi-cam in the bottom right, this was filmed on the canon at 25fps. The main content was screen-recorded on my laptop at 60fps. 
 
 # __Game Loader Utility__ [#](server/src/game.ts)
 This is a helper file that handles everything around starting/stopping and switching the currently active display-mode (aka. game).
@@ -223,8 +225,8 @@ One pixel in the application code is represented by the javascript-supported oct
 88088088     >>>>>     8 8 0 8 8 0 8 8     >>>>>     8 8 - 8 8 - 8 8
 ```
 
-<img src="docs/creeper.jpg" width="256">
-<img src="docs/creeper.png" width="256">
+    <img src="docs/creeper.jpg" width="256">
+    <img src="docs/creeper.png" width="256">
 
 
 # __Data Structure__
@@ -347,6 +349,20 @@ http://localhost:3000/kisdb/public/gamelist -X DELETE
 ```
 
 KisDB also requires a key to be specified, so `http://localhost:3000/kisdb` will not return an object with everything but instead get parsed as `key=''` which doesn't exist, but regardless unless admin, you don't have by default any permissions, so the response will be a statuscode of 403 (Forbidden) with an `Access Denied` message.
+
+# __Protocol Differences__
+HTTP/SSE, WebSocket and MQTT are all fundamentally very different protocols intended for very different usecases.
+If you open the [Youtube Video at 2:24](https://youtu.be/k8fjejrlu-U?t=144) and using **,** and **.** cycle through the individual frames, you will see when the active game changes from _pong_ to _snake_, the three clients will react differently. First the title of the WebSocket client (middle) will update to 'snake'. Then in the next frame it's display will update to '<1' from snake. The Raspi also updates in the same frame, as it too utilizes a WebSocket connection. Only two frames later will the HTTP client using [SSE](https://en.wikipedia.org/wiki/Server-sent_events) update it's title and screen at once. This is not by chance but by design.
+
+The WebSocket is designed to transmit __messages__ for realtime, low-latency applications. Like http, it is based on [TCP](https://en.wikipedia.org/wiki/Transmission_Control_Protocol). So a single message may get split up into multiple tcp packets if it's too big, but those will get put back together on the receiver to form the one singular message, since with WebSockets the client expects a to get the full message at once. WhatsApp and other realtime, bidirectional dataflow applications rely on WebSockets.
+
+HTTP in particular SSE on the other hand is mostly an unintended misuse/consequence of the underlying protocol, well it started out like that before it got standardized. This was called _HTTP Long Polling_ which is where a client sends a normal GET Request to the server, however the server responds with an open Content-Length header and doesn't close the connection. So to the browser & all intermediaries it looked like a normal file-transfer of unknown size, in reality though this was a workaround that allowed the server to send data to the client at any time. To prevent timeout, a ping would be sent every 30 seconds or so if no real data changed. Now with this in mind, the frame-by-frame analysis starts making sense. HTTP/SSE is not and was never to prioritize low-latency, but instead high data throughput, since it's purpose was to transmit large (or any size really) files. It's _byte-oriented_, not _message-oriented_, there is no concept of a single message, only an ordered sequence of bytes with no particular start or end-point. So it __buffers__ small messages sent in quick succession, then joins and transmits them as a single tcp packet, since that is more efficient on bandwidth usage. In the context of file-transfers, this approach makes the file load faster, however in the content of realtime messages, it increases latency. This is exactly the observed behavior. Since the title-change consists of just 7-bytes of data and the matrix-data is only another 66 bytes that's laughable for HTTP so it gets buffered instead of sent immediately in hope that more data will accumulate. Once it doesn't the internal timeout kicks in and sends the small packet anyways to prevent excessive latency spikes.
+
+MQTT is here by far the slowest, though that's because the packets need to travel over the entire internet to the broker and then back to the client. With http & ws the client & server are on the same Device (loopback) so that journey physically at least takes <1us, of course with a lot of additional overhead traveling through the network stack (all the TCP/IP layers).
+
+With the above video example, we can tell that on Frame #0 the WS Title changes, then at Frame #1 the display updates and at Frame #3 the HTTP client updates title & display. from that we can gather that based on 60fps, with WS as 0ms baseline, http took 50ms longer than WebSocket. And on Frame #11, mqtt finally updates, suggesting it's journey took about 183ms longer than WS.
+
+This is the reason why trying to play a game over MQTT feels incredibly unresponsive. Sending the player input takes 200ms and receiving the updated screen takes another 200ms, so 400ms. That's almost half a second! For gaming, 20ms is great, 50ms is hard to notice, 100ms is hard to miss and above 200ms most would consider it unplayable. MQTT doesn't look laggy when controlling over WebSocket because it's throughput is fine, so it's still smooth, just delayed by 200ms.
 
 # __Compromises from the [Original Proposal](proposal.md)__
 Given the quite large scope of the original proposal, especially when considering the limited project time of mere 6 weeks total and the fact that it's an addon-course alongside the main study and with my part-time job, significant cuts had to be made. I am however happy to say, that the most important parts all stayed ... except HTTP/3 :(
